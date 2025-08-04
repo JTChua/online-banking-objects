@@ -1,0 +1,23 @@
+# Database files
+*.db
+bank-app.db
+
+# SQLite temporary files
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+
+# Maven build output
+target/
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Environment/config files
+*.env
+*.properties
+
+# Dev container/CI files
+.devcontainer/
+.github/
