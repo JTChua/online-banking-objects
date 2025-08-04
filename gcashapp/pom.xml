@@ -73,6 +73,13 @@
     <version>2.0.17</version>
 </dependency>
 
+<!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
+<dependency>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>exec-maven-plugin</artifactId>
+    <version>3.5.1</version>
+</dependency>
+
   </dependencies>
 
 <build>
@@ -116,6 +123,15 @@
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.9.0</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>3.5.1</version>
+          <configuration>
+            <mainClass>com.tesdaciicc.App</mainClass>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
