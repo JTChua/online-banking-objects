@@ -13,5 +13,4 @@ public class ConnectionFactory {
   public static Connection get() throws SQLException {
     return DriverManager.getConnection(DB_URL);
   }
-
 }
