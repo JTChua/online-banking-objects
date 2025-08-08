@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   number TEXT NOT NULL UNIQUE,
-  pin TEXT NOT NULL,
+  pin INTEGER NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
