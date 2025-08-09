@@ -10,7 +10,7 @@ public class ConnectionFactory {
   private ConnectionFactory() {
   }
 
-  public static Connection get() throws SQLException {
+  public static Connection getConnection() throws SQLException {
     return DriverManager.getConnection(DB_URL);
   }
 }

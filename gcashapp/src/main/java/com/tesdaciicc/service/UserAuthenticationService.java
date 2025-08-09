@@ -1,11 +1,11 @@
 package com.tesdaciicc.service;
 
-import repository.UserAuthenticationDAO;
-import model.UserAuthentication;
+import com.tesdaciicc.data.repository.UserAuthenticationDAO;
+import com.tesdaciicc.model.UserAuthentication;
 
 public class UserAuthenticationService {
 
-  private UserAuthenticationDAO dao = new UserAuthenticationDAO();
+  private final UserAuthenticationDAO dao = new UserAuthenticationDAO();
 
   public boolean registerUser(UserAuthentication userAuthentication) {
     if (!validateUser(userAuthentication)) {

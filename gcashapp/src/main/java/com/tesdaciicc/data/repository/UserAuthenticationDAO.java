@@ -1,7 +1,7 @@
 package com.tesdaciicc.data.repository;
 
-import model.UserAuthentication;
-import util.ConnectionFactory;
+import com.tesdaciicc.model.UserAuthentication;
+import com.tesdaciicc.data.util.ConnectionFactory;
 
 import java.sql.*;
 
@@ -30,7 +30,8 @@ public class UserAuthenticationDAO {
       ResultSet rs = pstmt.executeQuery();
 
       if (rs.next()) {
-        return new User(
+        return new UserAuthentication(
+            rs.getInt("id"),
             rs.getString("name"),
             rs.getString("email"),
             rs.getString("number"),

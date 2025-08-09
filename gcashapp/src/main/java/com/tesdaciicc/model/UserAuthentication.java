@@ -11,7 +11,15 @@ public class UserAuthentication {
   public UserAuthentication() {
   }
 
-  public UserAuthentication(int id, String name, String email, String number, int pin) {
+  public UserAuthentication(String name, String email, String number, String pin) {
+    super();
+    this.name = name;
+    this.email = email;
+    this.number = number;
+    this.pin = pin;
+  }
+
+  public UserAuthentication(int id, String name, String email, String number, String pin) {
     super();
     this.id = id;
     this.name = name;
@@ -52,11 +60,11 @@ public class UserAuthentication {
     this.number = number;
   }
 
-  public int getPin() {
+  public String getPin() {
     return pin;
   }
 
-  public void setPin(int pin) {
+  public void setPin(String pin) {
     this.pin = pin;
   }
 

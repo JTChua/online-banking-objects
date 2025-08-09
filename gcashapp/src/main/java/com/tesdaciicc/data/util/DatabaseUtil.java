@@ -9,13 +9,15 @@ import java.sql.Statement;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.tesdaciicc.data.util.ConnectionFactory;
+
 public class DatabaseUtil {
 
   private DatabaseUtil() {
   }
 
   /** Call this once on app startup. */
-  public static void initialize() {
+  public static void initializeDatabase() {
     ensureDatabaseFolderExists();
     runSqlFromResource("sql/001_init.sql"); // put your create-table here
     // Add more migrations as needed (002_..., 003_..., etc.)
@@ -64,7 +66,7 @@ public class DatabaseUtil {
   }
 
   private static void executeUpdate(String sql) {
-    try (Connection c = ConnectionFactory.get();
+    try (Connection c = ConnectionFactory.getConnection();
         Statement st = c.createStatement()) {
       st.executeUpdate(sql);
     } catch (Exception e) {
