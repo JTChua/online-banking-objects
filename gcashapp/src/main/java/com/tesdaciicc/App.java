@@ -14,10 +14,13 @@ import com.tesdaciicc.data.util.DatabaseUtil;
 public class App {
 
     public static void main(String[] args) {
+        DatabaseUtil.initializeDatabase();
+
         UserAuthenticationService userAuthService = new UserAuthenticationService();
         Registration registration = new Registration(userAuthService);
 
-        DatabaseUtil.initializeDatabase();
+        Scanner scanner = new Scanner(System.in);
+
         while (true) {
             System.out.println("\n--- GCash App ---");
             System.out.println("1. Register");
@@ -27,18 +30,20 @@ public class App {
             System.out.println("5. Exit");
             System.out.print("Select option: ");
 
-            try (Scanner scanner = new Scanner(System.in)) {
-                int choice = scanner.nextInt();
-                scanner.nextLine();
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // clear buffer
 
-                switch (choice) {
-                    case 1 -> registration.register();
-                    case 2 -> Login.login();
-                    case 3 -> AccountSecurity.pinChange();
-                    case 4 -> System.out.println("You are  Logged out.");
-                    case 5 -> System.exit(0);
-                    default -> System.out.println("Invalid option.");
+            switch (choice) {
+                case 1 -> registration.register();
+                case 2 -> Login.login();
+                case 3 -> AccountSecurity.pinChange();
+                case 4 -> System.out.println("You are logged out.");
+                case 5 -> {
+                    System.out.println("Thank You!");
+                    scanner.close();
+                    System.exit(0);
                 }
+                default -> System.out.println("Invalid option.");
             }
         }
     }
