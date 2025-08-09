@@ -38,7 +38,7 @@
     }
   },
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y sqlite3 || echo 'SQLite install failed'; mvn clean install; java -version",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y sqlite3 || echo 'SQLite install failed'; sqlite3 payment-app.db < init.sql; mvn clean install; java -version",
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
   "postStartCommand": "echo 'Ready to code!'"
   // "remoteUser": "root"

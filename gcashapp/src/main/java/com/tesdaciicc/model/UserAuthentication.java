@@ -6,7 +6,7 @@ public class UserAuthentication {
   private String name;
   private String email;
   private String number;
-  private int pin;
+  private String pin;
 
   public UserAuthentication() {
   }
