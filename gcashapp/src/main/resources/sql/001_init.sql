@@ -6,3 +6,16 @@ CREATE TABLE IF NOT EXISTS users (
   pin INTEGER NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+
+CREATE TABLE IF NOT EXISTS Balance (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    amount REAL NOT NULL,
+    user_ID INTEGER NOT NULL,
+    FOREIGN KEY (user_ID) REFERENCES UserAuthentication(user_ID)
+);
+
+INSERT INTO Balance (amount, user_ID) VALUES (1000.50, 1);
+INSERT INTO Balance (amount, user_ID) VALUES (250.75, 2);
+
+
