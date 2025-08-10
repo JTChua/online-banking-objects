@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class Login {
 
-  private static final UserAuthenticationService userAuthService = new UserAuthenticationService();
+  private static UserAuthenticationService userAuthService;
 
   public static void login() {
     try (Scanner scanner = new Scanner(System.in)) {

@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.stream.Collectors;
+import java.util.Random;
 
 import com.tesdaciicc.data.util.ConnectionFactory;
 
@@ -27,7 +28,7 @@ public class DatabaseUtil {
 
   /** If db.url points to ./database/gcashapp.db, make sure ./database exists. */
   private static void ensureDatabaseFolderExists() {
-    String url = Config.get("db.url"); // e.g., jdbc:sqlite:./database/gcashapp.db
+    String url = Config.get("db.url");
     if (url == null)
       return;
     if (!url.startsWith("jdbc:sqlite:"))
@@ -74,26 +75,39 @@ public class DatabaseUtil {
     }
   }
 
-  /** Inserts dummy balance data if missing */
+  /** Inserts dummy balance data for each user if missing */
   private static void seedBalanceData() {
-    String checkSql = "SELECT COUNT(*) FROM Balance";
+    String getUsersSql = "SELECT id FROM users";
+    String checkBalanceSql = "SELECT COUNT(*) FROM Balance WHERE user_ID = ?";
     String insertSql = "INSERT INTO Balance (amount, user_ID) VALUES (?, ?)";
 
+    Random random = new Random();
+
     try (Connection conn = ConnectionFactory.getConnection();
-        PreparedStatement checkStmt = conn.prepareStatement(checkSql);
-        ResultSet rs = checkStmt.executeQuery()) {
+        PreparedStatement getUsersStmt = conn.prepareStatement(getUsersSql);
+        ResultSet usersRs = getUsersStmt.executeQuery()) {
 
-      if (rs.next() && rs.getInt(1) == 0) { // no records yet
-        try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-          insertStmt.setDouble(1, 1000.50);
-          insertStmt.setInt(2, 1);
-          insertStmt.executeUpdate();
+      while (usersRs.next()) {
+        int userId = usersRs.getInt("id");
 
-          insertStmt.setDouble(1, 250.75);
-          insertStmt.setInt(2, 2);
-          insertStmt.executeUpdate();
+        // Check if balance exists for this user
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkBalanceSql)) {
+          checkStmt.setInt(1, userId);
+          ResultSet checkRs = checkStmt.executeQuery();
 
-          System.out.println("[DatabaseUtil] Seeded dummy Balance data.");
+          if (checkRs.next() && checkRs.getInt(1) == 0) {
+            // Generate a random starting balance between ₱100 and ₱5000
+            double startingBalance = 100 + (5000 - 100) * random.nextDouble();
+            startingBalance = Math.round(startingBalance * 100.0) / 100.0; // 2 decimal places
+
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+              insertStmt.setDouble(1, startingBalance);
+              insertStmt.setInt(2, userId);
+              insertStmt.executeUpdate();
+              System.out.println("[DatabaseUtil] Seeded Balance for User ID " + userId +
+                  " (₱" + startingBalance + ")");
+            }
+          }
         }
       }
     } catch (Exception e) {

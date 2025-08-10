@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class AccountSecurity {
 
-  private static final UserAuthenticationService userAuthService = new UserAuthenticationService();
+  private static UserAuthenticationService userAuthService;
 
   public static void pinChange() {
 

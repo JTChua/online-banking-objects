@@ -3,9 +3,16 @@ package com.tesdaciicc.service;
 import com.tesdaciicc.data.repository.UserAuthenticationDAO;
 import com.tesdaciicc.model.UserAuthentication;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class UserAuthenticationService {
 
-  private final UserAuthenticationDAO dao = new UserAuthenticationDAO();
+  private final UserAuthenticationDAO dao;
+
+  public UserAuthenticationService(UserAuthenticationDAO dao) {
+    this.dao = dao;
+  }
 
   public boolean registerUser(UserAuthentication userAuthentication) {
     if (!validateUser(userAuthentication)) {
@@ -14,6 +21,16 @@ public class UserAuthenticationService {
     }
 
     try {
+      // Generate custom incremental userId
+      int nextId = dao.getNextUserId(); // DAO will find last userId and increment
+      userAuthentication.setId(nextId);
+
+      // Set createdDate in yyyy-MM-dd HH:mm:ss format
+      userAuthentication.setCreatedDate(LocalDateTime.now());
+
+      // Initially, lastLogin will be null until first successful login
+      userAuthentication.setLastLogin(null);
+
       dao.register(userAuthentication);
       return true;
     } catch (Exception e) {
@@ -24,7 +41,16 @@ public class UserAuthenticationService {
 
   public UserAuthentication loginUser(String number, String pin) {
     try {
-      return dao.login(number, pin);
+      UserAuthentication user = dao.login(number, pin);
+
+      if (user != null) {
+        // Update lastLogin timestamp only on successful login
+        String lastLogin = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        dao.updateLastLogin(user.getId(), lastLogin);
+        user.setLastLogin(lastLogin);
+      }
+
+      return user;
     } catch (Exception e) {
       System.out.println("Login failed: " + e.getMessage());
       return null;
