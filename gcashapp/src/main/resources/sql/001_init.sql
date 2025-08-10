@@ -14,13 +14,3 @@ CREATE TABLE IF NOT EXISTS Balance (
     user_ID INTEGER NOT NULL,
     FOREIGN KEY (user_ID) REFERENCES UserAuthentication(user_ID)
 );
-
-INSERT INTO Balance (amount, user_ID)
-SELECT 1000.50, 1
-WHERE NOT EXISTS (SELECT 1 FROM Balance WHERE user_ID = 1);
-
-INSERT INTO Balance (amount, user_ID)
-SELECT 250.75, 2
-WHERE NOT EXISTS (SELECT 1 FROM Balance WHERE user_ID = 2);
-
-
