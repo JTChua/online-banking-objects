@@ -19,7 +19,7 @@ import com.tesdaciicc.data.util.DatabaseUtil;
 public class App {
 
     public static void main(String[] args) {
-        DatabaseUtil.initializeDatabase();
+        // DatabaseUtil.initializeDatabase();
 
         // UserAuthenticationService userAuthService = new UserAuthenticationService();
         // Registration registration = new Registration(userAuthService);
@@ -67,21 +67,20 @@ public class App {
         UserAuthenticationDAO userDAO = new UserAuthenticationDAO();
         UserAuthenticationService userService = new UserAuthenticationService(userDAO);
 
-        // // 3️⃣ Test Registration
-        // System.out.println("=== Registering a new user ===");
-        // UserAuthentication newUser = new UserAuthentication();
-        // newUser.setName("John Doe");
-        // newUser.setEmail("john@example.com");
-        // newUser.setNumber("09171234567");
-        // newUser.setPin("1234");
+        // 3️⃣ Test Registration
+        System.out.println("=== Registering a new user ===");
+        UserAuthentication newUser = new UserAuthentication();
+        newUser.setName("John Doe");
+        newUser.setEmail("john@example.com");
+        newUser.setNumber("09171234567");
+        newUser.setPin("1234");
 
-        // boolean isRegistered = userService.registerUser(newUser);
-        // if (isRegistered) {
-        // System.out.println("✅ User registered successfully.");
-        // } else {
-        // System.out.println("❌ Registration failed (email or number may already
-        // exist).");
-        // }
+        boolean isRegistered = userService.registerUser(newUser);
+        if (isRegistered) {
+            System.out.println("✅ User registered successfully.");
+        } else {
+            System.out.println("❌ Registration failed (email or number may already exist).");
+        }
 
         // 4️⃣ Test Login
         System.out.println("\n=== Logging in ===");
@@ -97,12 +96,12 @@ public class App {
             System.out.println("❌ Invalid credentials.");
         }
 
-        // // 5️⃣ Test Duplicate Registration
-        // System.out.println("\n=== Testing duplicate registration ===");
-        // boolean duplicate = userService.registerUser(newUser);
-        // if (!duplicate) {
-        // System.out.println("✅ Duplicate detected — registration prevented.");
-        // }
+        // 5️⃣ Test Duplicate Registration
+        System.out.println("\n=== Testing duplicate registration ===");
+        boolean duplicate = userService.registerUser(newUser);
+        if (!duplicate) {
+            System.out.println("✅ Duplicate detected — registration prevented.");
+        }
 
         // 6️⃣ Close DB Connection (optional if your DAO handles it)
         System.out.println("\n=== Test complete ===");
