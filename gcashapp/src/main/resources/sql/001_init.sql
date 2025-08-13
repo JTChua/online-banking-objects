@@ -1,28 +1,16 @@
--- Users table: stores account details
+-- Users table: stores account details -- Main user table
 CREATE TABLE IF NOT EXISTS users (
-    userId INTEGER PRIMARY KEY AUTOINCREMENT,
-    firstName TEXT NOT NULL,
-    lastName TEXT NOT NULL,
-    userName TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    createdDate TEXT NOT NULL DEFAULT (datetime('now')),  -- ISO-8601 format
-    lastLogin TEXT
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    pin TEXT NOT NULL,
+    createdDate TEXT NOT NULL DEFAULT (datetime('now'))  --Auto-set on registration
 );
 
--- Balance table: stores account balance per user
-CREATE TABLE IF NOT EXISTS balance (
-    balanceId INTEGER PRIMARY KEY AUTOINCREMENT,
-    amount REAL NOT NULL DEFAULT 0.0,
-    userId INTEGER NOT NULL,
-    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
-);
-
--- Transactions table: stores transaction history
-CREATE TABLE IF NOT EXISTS transactions (
-    transactionId INTEGER PRIMARY KEY AUTOINCREMENT,
-    userId INTEGER NOT NULL,
-    type TEXT NOT NULL, -- e.g. "deposit", "withdrawal"
-    amount REAL NOT NULL,
-    timestamp TEXT NOT NULL DEFAULT (datetime('now')), -- ISO-8601
-    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+-- Login history table
+CREATE TABLE user_logins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    last_login TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );

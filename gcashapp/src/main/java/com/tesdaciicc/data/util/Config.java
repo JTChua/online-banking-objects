@@ -19,7 +19,29 @@ public class Config {
     }
   }
 
+  // Database configuration
+  public static final String DATABASE_NAME = "gcashapp.db";
+  public static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_NAME;
+  public static final String INIT_SQL_FILE = "/sql/001_init.sql";
+
+  // Application settings
+  public static final String APP_NAME = "GCash App";
+  public static final String APP_VERSION = "1.0.0";
+
+  // Security settings
+  public static final int MIN_PIN_LENGTH = 4;
+  public static final int MAX_PIN_LENGTH = 6;
+  public static final int MIN_NAME_LENGTH = 2;
+  public static final int MAX_LOGIN_ATTEMPTS = 3;
+
+  // Phone number validation
+  public static final String PHONE_PATTERN = "^09\\d{9}$"; // Philippine mobile format
+
+  // Email validation
+  public static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$";
+
   private Config() {
+    // Utility class - prevent instantiation
   }
 
   public static String get(String key) {

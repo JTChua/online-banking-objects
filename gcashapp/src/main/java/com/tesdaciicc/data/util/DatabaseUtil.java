@@ -10,12 +10,19 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.stream.Collectors;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.tesdaciicc.data.util.ConnectionFactory;
 
+/**
+ * Utility class for database operations and initialization
+ */
 public class DatabaseUtil {
-
+  private static final Logger logger = LoggerFactory.getLogger(DatabaseUtil.class);
+  
   private DatabaseUtil() {
+    // Utility class - prevent instantiation
   }
 
   /** Call this once on app startup. */

@@ -1,24 +1,24 @@
 package com.tesdaciicc.model;
 
-public class Balance {
+public class CheckBalance {
 
-  private int id;
+  private int balanceId;
   private double amount;
   private int userId;
 
-  public Balance(int id, double amount, int userId) {
-    this.id = id;
+  public CheckBalance(int balanceId, double amount, int userId) {
+    this.balanceId = balanceId;
     this.amount = amount;
     this.userId = userId;
   }
 
-  public Balance(double amount, int userId) {
+  public CheckBalance(double amount, int userId) {
     this.amount = amount;
     this.userId = userId;
   }
 
-  public int getId() {
-    return id;
+  public int getbalanceId() {
+    return balanceId;
   }
 
   public double getAmount() {

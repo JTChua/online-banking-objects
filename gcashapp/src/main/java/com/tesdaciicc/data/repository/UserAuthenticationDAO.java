@@ -1,99 +1,30 @@
 package com.tesdaciicc.data.repository;
 
-import com.tesdaciicc.model.UserAuthentication;
-import com.tesdaciicc.data.util.ConnectionFactory;
-
-import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserAuthenticationDAO {
 
-  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  private static final Logger logger = LoggerFactory.getLogger(UserAuthenticationDAO.class);
 
-  public int getNextUserId() throws SQLException {
-    String sql = "SELECT COALESCE(MAX(userId), 0) + 1 AS nextId FROM users";
-    try (Connection conn = ConnectionFactory.getConnection();
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(sql)) {
-      if (rs.next()) {
-        return rs.getInt("nextId");
-      }
-    }
-    return 1;
-  }
+  // SQL Queries
+  private static final String INSERT_USER = "INSERT INTO users (name, email, number, pin, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)";
 
-  public void register(UserAuthentication userAuthentication) throws SQLException {
-    String sql = "INSERT INTO users (userId, name, email, number, pin, createdDate) VALUES (?, ?, ?, ?, ?, ?)";
-    try (Connection conn = ConnectionFactory.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setInt(1, userAuthentication.getId());
-      pstmt.setString(2, userAuthentication.getName());
-      pstmt.setString(3, userAuthentication.getEmail());
-      pstmt.setString(4, userAuthentication.getNumber());
-      pstmt.setString(5, userAuthentication.getPin());
-      pstmt.setString(6, userAuthentication.getFormattedCreatedDate());
-      pstmt.executeUpdate();
-    }
-  }
+  private static final String SELECT_USER_BY_ID = "SELECT id, name, email, number, pin, created_at, updated_at FROM users WHERE id = ?";
 
-  public UserAuthentication login(String number, String pin) throws SQLException {
-    String sql = "SELECT * FROM users WHERE number = ? AND pin = ?";
-    try (Connection conn = ConnectionFactory.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, number);
-      pstmt.setString(2, pin);
-      ResultSet rs = pstmt.executeQuery();
+  private static final String SELECT_USER_BY_EMAIL = "SELECT id, name, email, number, pin, created_at, updated_at FROM users WHERE email = ?";
 
-      if (rs.next()) {
-        updateLastLogin(rs.getInt("userId"));
-        return new UserAuthentication(
-            rs.getInt("userId"),
-            rs.getString("name"),
-            rs.getString("email"),
-            rs.getString("number"),
-            rs.getString("pin"),
-            LocalDateTime.parse(rs.getString("createdDate"), FORMATTER),
-            rs.getString("lastLogin") != null ? LocalDateTime.parse(rs.getString("lastLogin"), FORMATTER) : null);
-      }
-    }
-    return null;
-  }
+  private static final String SELECT_USER_BY_NUMBER = "SELECT id, name, email, number, pin, created_at, updated_at FROM users WHERE number = ?";
 
-  public void updateLastLogin(int userId, String lastLogin) throws SQLException {
-    String sql = "UPDATE users SET lastLogin = ? WHERE userId = ?";
-    try (Connection conn = ConnectionFactory.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, lastLogin); // use the passed-in value
-      pstmt.setInt(2, userId);
-      pstmt.executeUpdate();
-    }
-  }
+  private static final String SELECT_USER_BY_EMAIL_OR_NUMBER = "SELECT id, name, email, number, pin, created_at, updated_at FROM users WHERE email = ? OR number = ?";
 
-  public void updateLastLogin(int userId) throws SQLException {
-    // forward to the 2-arg method using formatted now()
-    String nowStr = LocalDateTime.now().format(FORMATTER);
-    updateLastLogin(userId, nowStr);
-  }
+  private static final String UPDATE_USER = "UPDATE users SET name = ?, email = ?, number = ?, updated_at = ? WHERE id = ?";
 
-  public boolean updatePin(String number, String oldPin, String newPin) throws SQLException {
-    String sql = "UPDATE users SET pin = ? WHERE number = ? AND pin = ?";
-    try (Connection conn = ConnectionFactory.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, newPin);
-      pstmt.setString(2, number);
-      pstmt.setString(3, oldPin);
-      return pstmt.executeUpdate() > 0;
-    }
-  }
+  private static final String UPDATE_PIN = "UPDATE users SET pin = ?, updated_at = ? WHERE id = ?";
 
-  public boolean deleteUser(String number, String pin) throws SQLException {
-    String sql = "DELETE FROM users WHERE number = ? AND pin = ?";
-    try (Connection conn = ConnectionFactory.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, number);
-      pstmt.setString(2, pin);
-      return pstmt.executeUpdate() > 0;
-    }
-  }
+  private static final String DELETE_USER = "DELETE FROM users WHERE id = ?";
+
+  private static final String SELECT_ALL_USERS = "SELECT id, name, email, number, pin, created_at, updated_at FROM users ORDER BY created_at DESC";
+
+  private static final String COUNT_USERS = "SELECT COUNT(*) FROM users";
 }
