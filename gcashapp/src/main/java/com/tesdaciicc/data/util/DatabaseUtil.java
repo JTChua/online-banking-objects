@@ -7,39 +7,67 @@ import java.nio.file.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.stream.Collectors;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tesdaciicc.data.util.ConnectionFactory;
-
 /**
  * Utility class for database operations and initialization
  */
 public class DatabaseUtil {
   private static final Logger logger = LoggerFactory.getLogger(DatabaseUtil.class);
-  
+
   private DatabaseUtil() {
     // Utility class - prevent instantiation
   }
 
-  /** Call this once on app startup. */
-  public static void initializeDatabase() {
-    ensureDatabaseFolderExists();
-    runSqlFromResource("sql/001_init.sql"); // put your create-table here
-    // Add more migrations as needed (002_..., 003_..., etc.)
-    seedBalanceData(); // insert dummy balances if missing
+  /**
+   * Call this once on app startup
+   * 
+   * @return true if initialization is successful
+   */
+  public static boolean initializeDatabase() {
+    try {
+      logger.info("Initializing database...");
+
+      ensureDatabaseFolderExists();
+
+      // Use Config constant instead of Config.get()
+      if (!runSqlFromResource(Config.INIT_SQL_FILE)) {
+        logger.error("Failed to run initialization SQL");
+        return false;
+      }
+
+      // Seed balance data if Balance table exists
+      seedBalanceData();
+
+      logger.info("Database initialized successfully");
+      return true;
+
+    } catch (Exception e) {
+      logger.error("Database initialization failed", e);
+      return false;
+    }
   }
 
-  /** If db.url points to ./database/gcashapp.db, make sure ./database exists. */
+  /**
+   * If db.url points to ./database/gcashapp.db, make sure ./database exists
+   */
   private static void ensureDatabaseFolderExists() {
-    String url = Config.get("db.url");
-    if (url == null)
+    // Use Config constant instead of Config.get()
+    String url = Config.DATABASE_URL;
+    if (url == null) {
+      logger.warn("Database URL is null");
       return;
-    if (!url.startsWith("jdbc:sqlite:"))
+    }
+
+    if (!url.startsWith("jdbc:sqlite:")) {
+      logger.debug("Not an SQLite URL, skipping folder creation");
       return;
+    }
 
     String pathPart = url.substring("jdbc:sqlite:".length());
     Path dbPath = Paths.get(pathPart).normalize();
@@ -48,42 +76,98 @@ public class DatabaseUtil {
     if (parent != null) {
       try {
         Files.createDirectories(parent);
+        logger.debug("Created database directory: {}", parent);
       } catch (Exception e) {
+        logger.error("Failed to create database directory: {}", parent, e);
         throw new RuntimeException("Failed to create database directory: " + parent, e);
       }
     }
   }
 
-  /** Executes a SQL file from resources (classpath). */
-  public static void runSqlFromResource(String resourcePath) {
-    try (InputStream in = DatabaseUtil.class.getClassLoader().getResourceAsStream(resourcePath)) {
-      if (in == null)
-        return;
-      String sql = new BufferedReader(new InputStreamReader(in))
-          .lines().collect(Collectors.joining("\n"));
+  /**
+   * Executes a SQL file from resources (classpath)
+   * 
+   * @param resourcePath Path to SQL resource file
+   * @return true if execution was successful
+   */
+  public static boolean runSqlFromResource(String resourcePath) {
+    logger.debug("Running SQL from resource: {}", resourcePath);
 
-      for (String stmt : sql.split(";")) {
-        String trimmed = stmt.trim();
-        if (trimmed.isEmpty())
-          continue;
-        executeUpdate(trimmed);
+    try (InputStream in = DatabaseUtil.class.getResourceAsStream(resourcePath)) {
+      if (in == null) {
+        logger.error("SQL resource not found: {}", resourcePath);
+        return false;
       }
+
+      String sql = new BufferedReader(new InputStreamReader(in))
+          .lines()
+          .collect(Collectors.joining("\n"));
+
+      return executeMultipleStatements(sql);
+
     } catch (Exception e) {
-      throw new RuntimeException("Failed to run SQL resource: " + resourcePath, e);
+      logger.error("Failed to run SQL resource: {}", resourcePath, e);
+      return false;
     }
   }
 
-  private static void executeUpdate(String sql) {
-    try (Connection c = ConnectionFactory.getConnection();
-        Statement st = c.createStatement()) {
-      st.executeUpdate(sql);
-    } catch (Exception e) {
-      throw new RuntimeException("SQL failed: " + sql, e);
+  /**
+   * Executes multiple SQL statements separated by semicolons
+   * 
+   * @param sql Multiple SQL statements
+   * @return true if all statements executed successfully
+   */
+  private static boolean executeMultipleStatements(String sql) {
+    String[] statements = sql.split(";");
+
+    try (Connection connection = ConnectionFactory.getConnection();
+        Statement statement = connection.createStatement()) {
+
+      for (String stmt : statements) {
+        String trimmed = stmt.trim();
+        if (!trimmed.isEmpty() && !trimmed.startsWith("--")) {
+          statement.execute(trimmed);
+          logger.debug("Executed SQL: {}", trimmed.substring(0, Math.min(50, trimmed.length())));
+        }
+      }
+      return true;
+
+    } catch (SQLException e) {
+      logger.error("Failed to execute SQL statements", e);
+      return false;
     }
   }
 
-  /** Inserts dummy balance data for each user if missing */
+  /**
+   * Checks if the database exists and is accessible
+   * 
+   * @return true if database is ready
+   */
+  public static boolean isDatabaseReady() {
+    try (Connection connection = ConnectionFactory.getConnection()) {
+      // Try to query users table to verify database is properly set up
+      connection.createStatement().executeQuery("SELECT COUNT(*) FROM users").close();
+      logger.debug("Database is ready");
+      return true;
+    } catch (SQLException e) {
+      logger.warn("Database not ready: {}", e.getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * Inserts dummy balance data for each user if missing
+   * Note: This requires a Balance table to exist
+   */
   private static void seedBalanceData() {
+    // Check if Balance table exists first
+    if (!tableExists("Balance")) {
+      logger.debug("Balance table doesn't exist, skipping balance seeding");
+      return;
+    }
+
+    logger.debug("Seeding balance data...");
+
     String getUsersSql = "SELECT id FROM users";
     String checkBalanceSql = "SELECT COUNT(*) FROM Balance WHERE user_ID = ?";
     String insertSql = "INSERT INTO Balance (amount, user_ID) VALUES (?, ?)";
@@ -100,25 +184,71 @@ public class DatabaseUtil {
         // Check if balance exists for this user
         try (PreparedStatement checkStmt = conn.prepareStatement(checkBalanceSql)) {
           checkStmt.setInt(1, userId);
-          ResultSet checkRs = checkStmt.executeQuery();
+          try (ResultSet checkRs = checkStmt.executeQuery()) {
+            if (checkRs.next() && checkRs.getInt(1) == 0) {
+              // Generate a random starting balance between ₱100 and ₱5000
+              double startingBalance = 100 + (5000 - 100) * random.nextDouble();
+              startingBalance = Math.round(startingBalance * 100.0) / 100.0; // 2 decimal places
 
-          if (checkRs.next() && checkRs.getInt(1) == 0) {
-            // Generate a random starting balance between ₱100 and ₱5000
-            double startingBalance = 100 + (5000 - 100) * random.nextDouble();
-            startingBalance = Math.round(startingBalance * 100.0) / 100.0; // 2 decimal places
-
-            try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-              insertStmt.setDouble(1, startingBalance);
-              insertStmt.setInt(2, userId);
-              insertStmt.executeUpdate();
-              System.out.println("[DatabaseUtil] Seeded Balance for User ID " + userId +
-                  " (₱" + startingBalance + ")");
+              try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                insertStmt.setDouble(1, startingBalance);
+                insertStmt.setInt(2, userId);
+                insertStmt.executeUpdate();
+                logger.info("Seeded balance for User ID {} (₱{})", userId, startingBalance);
+              }
             }
           }
         }
       }
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (SQLException e) {
+      logger.error("Error seeding balance data", e);
+    }
+  }
+
+  /**
+   * Checks if a table exists in the database
+   * 
+   * @param tableName Table name to check
+   * @return true if table exists
+   */
+  private static boolean tableExists(String tableName) {
+    String sql = "SELECT name FROM sqlite_master WHERE type='table' AND name=?";
+
+    try (Connection connection = ConnectionFactory.getConnection();
+        PreparedStatement statement = connection.prepareStatement(sql)) {
+
+      statement.setString(1, tableName);
+      try (ResultSet resultSet = statement.executeQuery()) {
+        boolean exists = resultSet.next();
+        logger.debug("Table '{}' exists: {}", tableName, exists);
+        return exists;
+      }
+
+    } catch (SQLException e) {
+      logger.error("Error checking if table '{}' exists", tableName, e);
+      return false;
+    }
+  }
+
+  /**
+   * Drops all tables (for testing purposes)
+   * 
+   * @return true if successful
+   */
+  public static boolean dropAllTables() {
+    logger.warn("Dropping all database tables");
+
+    try (Connection connection = ConnectionFactory.getConnection();
+        Statement statement = connection.createStatement()) {
+
+      statement.execute("DROP TABLE IF EXISTS Balance");
+      statement.execute("DROP TABLE IF EXISTS users");
+      logger.info("All tables dropped successfully");
+      return true;
+
+    } catch (SQLException e) {
+      logger.error("Failed to drop tables", e);
+      return false;
     }
   }
 }

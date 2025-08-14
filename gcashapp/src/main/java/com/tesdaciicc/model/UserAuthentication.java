@@ -1,5 +1,8 @@
 package com.tesdaciicc.model;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 public class UserAuthentication {
 
   private int id;
@@ -7,6 +10,12 @@ public class UserAuthentication {
   private String email;
   private String number;
   private String pin;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
+
+  // Default constructor
+  public UserAuthentication() {
+  }
 
   // Constructor without ID (for registration)
   public UserAuthentication(String name, String email, String number, String pin) {
@@ -17,12 +26,16 @@ public class UserAuthentication {
   }
 
   // Full constructor (for reading from DB)
-  public UserAuthentication(int id, String name, String email, String number, String pin) {
+  public UserAuthentication(int id, String name, String email, String number, String pin, LocalDateTime createdAt,
+      LocalDateTime updatedAt) {
     setId(id);
     setName(name);
     setEmail(email);
     setNumber(number);
     setPin(pin);
+    setCreatedAt(createdAt);
+    setUpdatedAt(updatedAt);
+
   }
 
   // Getters & Setters
@@ -66,10 +79,47 @@ public class UserAuthentication {
     this.pin = pin;
   }
 
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
   @Override
   public String toString() {
-    return "UserAuthentication [id=" + id + ", name=" + name + ", email=" + email +
-        ", number=" + number + ", pin=" + pin + "]";
+    return "UserAuthentication{" +
+        "id=" + id +
+        ", name='" + name + '\'' +
+        ", email='" + email + '\'' +
+        ", number='" + number + '\'' +
+        ", createdAt=" + createdAt +
+        ", updatedAt=" + updatedAt +
+        '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    UserAuthentication that = (UserAuthentication) o;
+    return id == that.id;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 
 }
