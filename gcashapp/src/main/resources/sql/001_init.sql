@@ -3,8 +3,10 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT NOT NULL,
+    number TEXT NOT NULL UNIQUE,
     pin TEXT NOT NULL,
     createdDate TEXT NOT NULL DEFAULT (datetime('now'))  --Auto-set on registration
+    updatedDate TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- Login history table

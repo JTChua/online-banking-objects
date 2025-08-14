@@ -1,17 +1,17 @@
 package com.tesdaciicc.model;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class UserAuthentication {
 
-  private int id;
+  private Integer id;
   private String name;
   private String email;
   private String number;
   private String pin;
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
+  private String token;
+  private String createdDate;
+  private String updatedDate;
 
   // Default constructor
   public UserAuthentication() {
@@ -26,24 +26,24 @@ public class UserAuthentication {
   }
 
   // Full constructor (for reading from DB)
-  public UserAuthentication(int id, String name, String email, String number, String pin, LocalDateTime createdAt,
-      LocalDateTime updatedAt) {
+  public UserAuthentication(Integer id, String name, String email, String number, String pin, String createdDate,
+      String updatedDate) {
     setId(id);
     setName(name);
     setEmail(email);
     setNumber(number);
     setPin(pin);
-    setCreatedAt(createdAt);
-    setUpdatedAt(updatedAt);
+    setCreatedDate(createdDate);
+    setUpdatedDate(updatedDate);
 
   }
 
   // Getters & Setters
-  public int getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 
@@ -79,20 +79,28 @@ public class UserAuthentication {
     this.pin = pin;
   }
 
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
+  public String getToken() {
+    return token;
   }
 
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
+  public void setToken(String token) {
+    this.token = token;
   }
 
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
+  public String getCreatedDate() {
+    return createdDate;
   }
 
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
+  public void setCreatedDate(String createdDate) {
+    this.createdDate = createdDate;
+  }
+
+  public String getUpdatedDate() {
+    return updatedDate;
+  }
+
+  public void setUpdatedDate(String updatedDate) {
+    this.updatedDate = updatedDate;
   }
 
   @Override
@@ -102,8 +110,8 @@ public class UserAuthentication {
         ", name='" + name + '\'' +
         ", email='" + email + '\'' +
         ", number='" + number + '\'' +
-        ", createdAt=" + createdAt +
-        ", updatedAt=" + updatedAt +
+        ", createdAt=" + createdDate +
+        ", updatedAt=" + updatedDate +
         '}';
   }
 

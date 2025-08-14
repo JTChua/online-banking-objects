@@ -7,8 +7,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import java.security.SecureRandom;
 import java.sql.Statement;
 
 import org.slf4j.Logger;
@@ -17,12 +15,11 @@ import org.slf4j.LoggerFactory;
 import com.tesdaciicc.data.util.ConnectionFactory;
 import com.tesdaciicc.model.UserAuthentication;
 
-public class UserAuthenticationDAO {
+public class UserDAO {
 
-  private static final Logger logger = LoggerFactory.getLogger(UserAuthenticationDAO.class);
-  private static final SecureRandom secureRandom = new SecureRandom();
+  private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
 
-  // SQL Queries for users table - Updated with new column names
+  // SQL Queries - Updated with new column names
   private static final String INSERT_USER = "INSERT INTO users (name, email, number, pin) VALUES (?, ?, ?, ?)";
 
   private static final String SELECT_USER_BY_ID = "SELECT id, name, email, number, pin, createdDate, updatedDate FROM users WHERE id = ?";
@@ -43,229 +40,49 @@ public class UserAuthenticationDAO {
 
   private static final String COUNT_USERS = "SELECT COUNT(*) FROM users";
 
-  // SQL Queries for user_authentication table
-  private static final String INSERT_AUTH = "INSERT INTO user_authentication (user_id, token) VALUES (?, ?)";
-
-  private static final String SELECT_AUTH_BY_TOKEN = "SELECT id, user_id, token, createdDate, updatedDate FROM user_authentication WHERE token = ?";
-
-  private static final String DELETE_AUTH_BY_TOKEN = "DELETE FROM user_authentication WHERE token = ?";
-
-  private static final String DELETE_AUTH_BY_USER_ID = "DELETE FROM user_authentication WHERE user_id = ?";
-
   /**
    * Saves a new user to the database (Registration)
    * 
-   * @param userAuth UserAuthentication object to save
+   * @param user User object to save
    * @return Optional containing the saved user with generated ID, or empty if
    *         failed
    */
-  public Optional<UserAuthentication> save(UserAuthentication userAuth) {
-    logger.debug("Saving user: {}", userAuth.getEmail());
+  public Optional<UserAuthentication> save(UserAuthentication user) {
+    logger.debug("Saving user: {}", user.getEmail());
 
     try (Connection connection = ConnectionFactory.getConnection();
         PreparedStatement statement = connection.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
 
-      statement.setString(1, userAuth.getName());
-      statement.setString(2, userAuth.getEmail());
-      statement.setString(3, userAuth.getNumber());
-      statement.setString(4, userAuth.getPin());
+      statement.setString(1, user.getName());
+      statement.setString(2, user.getEmail());
+      statement.setString(3, user.getNumber());
+      statement.setString(4, user.getPin());
 
       int affectedRows = statement.executeUpdate();
 
       if (affectedRows > 0) {
         try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
           if (generatedKeys.next()) {
-            userAuth.setId(generatedKeys.getInt(1));
+            user.setId(generatedKeys.getInt(1));
 
             // Retrieve the auto-generated dates
-            Optional<UserAuthentication> savedUser = findById((long) userAuth.getId());
+            Optional<UserAuthentication> savedUser = findById((int) user.getId());
             if (savedUser.isPresent()) {
-              userAuth.setCreatedDate(savedUser.get().getCreatedDate());
-              userAuth.setUpdatedDate(savedUser.get().getUpdatedDate());
+              user.setCreatedDate(savedUser.get().getCreatedDate());
+              user.setUpdatedDate(savedUser.get().getUpdatedDate());
             }
 
-            logger.info("User saved successfully with ID: {}", userAuth.getId());
-            return Optional.of(userAuth);
-          }
-        }
-      }
-
-    } catch (SQLException e) {
-      logger.error("Error saving user: {}", userAuth.getEmail(), e);
-    }
-
-    return Optional.empty();
-  }
-
-  /**
-   * Authenticates user and generates token
-   * 
-   * @param emailOrNumber Email or phone number
-   * @param pin           User PIN
-   * @return Optional containing UserAuthentication with token, or empty if
-   *         authentication failed
-   */
-  public Optional<UserAuthentication> authenticate(String emailOrNumber, String pin) {
-    logger.debug("Authenticating user: {}", emailOrNumber);
-
-    Optional<UserAuthentication> userOpt = findByEmailOrNumber(emailOrNumber);
-
-    if (userOpt.isPresent()) {
-      UserAuthentication user = userOpt.get();
-
-      // Verify PIN
-      if (pin.equals(user.getPin())) {
-        // Generate and save authentication token
-        String token = generateToken();
-
-        if (saveAuthenticationToken(user.getId(), token)) {
-          user.setToken(token);
-          logger.info("User authenticated successfully: {}", user.getId());
-          return Optional.of(user);
-        }
-      } else {
-        logger.warn("Invalid PIN for user: {}", emailOrNumber);
-      }
-    } else {
-      logger.warn("User not found: {}", emailOrNumber);
-    }
-
-    return Optional.empty();
-  }
-
-  /**
-   * Validates authentication token
-   * 
-   * @param token Authentication token
-   * @return Optional containing UserAuthentication if token is valid
-   */
-  public Optional<UserAuthentication> validateToken(String token) {
-    logger.debug("Validating token");
-
-    try (Connection connection = ConnectionFactory.getConnection();
-        PreparedStatement statement = connection.prepareStatement(SELECT_AUTH_BY_TOKEN)) {
-
-      statement.setString(1, token);
-
-      try (ResultSet resultSet = statement.executeQuery()) {
-        if (resultSet.next()) {
-          int userId = resultSet.getInt("user_id");
-
-          // Get user details
-          Optional<UserAuthentication> userOpt = findById((long) userId);
-          if (userOpt.isPresent()) {
-            UserAuthentication user = userOpt.get();
-            user.setToken(token);
-            logger.debug("Token validated for user: {}", userId);
+            logger.info("User saved successfully with ID: {}", user.getId());
             return Optional.of(user);
           }
         }
       }
 
     } catch (SQLException e) {
-      logger.error("Error validating token", e);
+      logger.error("Error saving user: {}", user.getEmail(), e);
     }
 
-    logger.debug("Invalid token");
     return Optional.empty();
-  }
-
-  /**
-   * Logs out user by invalidating token
-   * 
-   * @param token Authentication token to invalidate
-   * @return true if logout was successful
-   */
-  public boolean logout(String token) {
-    logger.debug("Logging out user with token");
-
-    try (Connection connection = ConnectionFactory.getConnection();
-        PreparedStatement statement = connection.prepareStatement(DELETE_AUTH_BY_TOKEN)) {
-
-      statement.setString(1, token);
-
-      int affectedRows = statement.executeUpdate();
-
-      if (affectedRows > 0) {
-        logger.info("User logged out successfully");
-        return true;
-      }
-
-    } catch (SQLException e) {
-      logger.error("Error logging out user", e);
-    }
-
-    return false;
-  }
-
-  /**
-   * Logs out all sessions for a user
-   * 
-   * @param userId User ID
-   * @return true if logout was successful
-   */
-  public boolean logoutAll(Integer userId) {
-    logger.debug("Logging out all sessions for user: {}", userId);
-
-    try (Connection connection = ConnectionFactory.getConnection();
-        PreparedStatement statement = connection.prepareStatement(DELETE_AUTH_BY_USER_ID)) {
-
-      statement.setInt(1, userId);
-
-      int affectedRows = statement.executeUpdate();
-
-      logger.info("Logged out {} sessions for user: {}", affectedRows, userId);
-      return true;
-
-    } catch (SQLException e) {
-      logger.error("Error logging out all sessions for user: {}", userId, e);
-    }
-
-    return false;
-  }
-
-  /**
-   * Generates a secure authentication token
-   * 
-   * @return Generated token string
-   */
-  private String generateToken() {
-    // Option 1: UUID-based token (simpler)
-    return UUID.randomUUID().toString().replace("-", "");
-
-    // Option 2: More secure random token (uncomment if preferred)
-    /*
-     * byte[] randomBytes = new byte[32];
-     * secureRandom.nextBytes(randomBytes);
-     * StringBuilder token = new StringBuilder();
-     * for (byte b : randomBytes) {
-     * token.append(String.format("%02x", b));
-     * }
-     * return token.toString();
-     */
-  }
-
-  /**
-   * Saves authentication token to database
-   * 
-   * @param userId User ID
-   * @param token  Authentication token
-   * @return true if save was successful
-   */
-  private boolean saveAuthenticationToken(Integer userId, String token) {
-    try (Connection connection = ConnectionFactory.getConnection();
-        PreparedStatement statement = connection.prepareStatement(INSERT_AUTH)) {
-
-      statement.setInt(1, userId);
-      statement.setString(2, token);
-
-      int affectedRows = statement.executeUpdate();
-      return affectedRows > 0;
-
-    } catch (SQLException e) {
-      logger.error("Error saving authentication token for user: {}", userId, e);
-      return false;
-    }
   }
 
   /**
@@ -274,7 +91,7 @@ public class UserAuthenticationDAO {
    * @param id User ID
    * @return Optional containing the user, or empty if not found
    */
-  public Optional<UserAuthentication> findById(Long id) {
+  public Optional<UserAuthentication> findById(int id) {
     logger.debug("Finding user by ID: {}", id);
 
     try (Connection connection = ConnectionFactory.getConnection();
@@ -526,10 +343,10 @@ public class UserAuthenticationDAO {
   }
 
   /**
-   * Maps a ResultSet row to UserAuthentication object
+   * Maps a ResultSet row to User object
    * 
    * @param resultSet ResultSet containing user data
-   * @return UserAuthentication object
+   * @return User object
    * @throws SQLException if mapping fails
    */
   private UserAuthentication mapResultSetToUser(ResultSet resultSet) throws SQLException {
@@ -545,4 +362,5 @@ public class UserAuthenticationDAO {
 
     return user;
   }
+
 }
