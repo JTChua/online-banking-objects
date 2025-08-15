@@ -1,18 +1,22 @@
--- Users table: stores account details -- Main user table
+-- Simple initialization script for debugging
+-- Users table: stores account details
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    email TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
     number TEXT NOT NULL UNIQUE,
     pin TEXT NOT NULL,
-    createdDate TEXT NOT NULL DEFAULT (datetime('now'))  --Auto-set on registration
+    token TEXT,
+    createdDate TEXT NOT NULL DEFAULT (datetime('now')),
     updatedDate TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Login history table
-CREATE TABLE user_logins (
+-- Balance table: stores user balances  
+CREATE TABLE IF NOT EXISTS Balance (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    last_login TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    user_ID INTEGER NOT NULL,
+    amount REAL NOT NULL DEFAULT 0.0,
+    createdDate TEXT NOT NULL DEFAULT (datetime('now')),
+    updatedDate TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (user_ID) REFERENCES users(id) ON DELETE CASCADE
 );

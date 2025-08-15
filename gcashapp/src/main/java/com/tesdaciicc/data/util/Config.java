@@ -19,9 +19,9 @@ public class Config {
     }
   }
 
-  // Database configuration
+  // Database configuration - Fixed to use full path
   public static final String DATABASE_NAME = "gcashapp.db";
-  public static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_NAME;
+  public static final String DATABASE_URL = "jdbc:sqlite:./gcashapp.db";
   public static final String INIT_SQL_FILE = "/sql/001_init.sql";
 
   // Application settings
@@ -47,5 +47,4 @@ public class Config {
   public static String get(String key) {
     return props.getProperty(key);
   }
-
 }

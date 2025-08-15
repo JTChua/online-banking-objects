@@ -89,10 +89,40 @@ public class UserAuthenticationService {
     try {
       Optional<UserAuthentication> authenticatedUser = dao.authenticate(emailOrNumber.trim(), pin);
 
+      // if (authenticatedUser.isPresent()) {
+      // UserAuthentication user = authenticatedUser.get();
+      // logger.info("User logged in successfully: {} with token", user.getId());
+      // return user; // Contains the generated token
+
       if (authenticatedUser.isPresent()) {
         UserAuthentication user = authenticatedUser.get();
+
+        // Verify token exists in database
+        Optional<UserAuthentication> dbUser = dao.validateToken(user.getToken());
+        if (!dbUser.isPresent()) {
+          logger.error("CRITICAL: Token was generated but not saved to DB for user {}", user.getId());
+          return null;
+        }
+
         logger.info("User logged in successfully: {} with token", user.getId());
-        return user; // Contains the generated token
+        return user;
+      }
+
+      if (authenticatedUser.isPresent()) {
+        UserAuthentication user = authenticatedUser.get();
+        logger.debug("Login successful - User ID: {}, Token: {}",
+            user.getId(), user.getToken());
+        return user;
+      }
+
+      if (authenticatedUser.isPresent()) {
+        UserAuthentication user = authenticatedUser.get();
+        if (user.getToken() == null || user.getToken().isEmpty()) {
+          logger.error("Login succeeded but token was null for user: {}", user.getId());
+          return null;
+        }
+        logger.info("User logged in successfully: {} with token", user.getId());
+        return user;
       } else {
         logger.warn("Authentication failed for: {}", emailOrNumber);
         return null;
@@ -101,6 +131,7 @@ public class UserAuthenticationService {
       logger.error("Login failed for: {} - {}", emailOrNumber, e.getMessage());
       return null;
     }
+
   }
 
   /**
@@ -110,6 +141,7 @@ public class UserAuthenticationService {
    * @return UserAuthentication if token is valid, null otherwise
    */
   public UserAuthentication validateToken(String token) {
+    logger.debug("Validating token: {}", token);
     if (token == null || token.trim().isEmpty()) {
       logger.warn("Empty token provided for validation");
       return null;
@@ -163,13 +195,18 @@ public class UserAuthenticationService {
       return false;
     }
 
+    if (newPin.equals(oldPin) || newPin.matches("(.)\\1{3}")) {
+      logger.warn("Avoid using easily guessable sequences like 1111, 1234, or your birthdate: {}", emailOrNumber);
+      return false;
+    }
+
     try {
       // First verify old PIN by attempting authentication
       Optional<UserAuthentication> user = dao.authenticate(emailOrNumber.trim(), oldPin);
 
       if (user.isPresent()) {
         // Old PIN is correct, update to new PIN
-        boolean updated = dao.updatePin((long) user.get().getId(), newPin);
+        boolean updated = dao.updatePin(user.get().getId(), newPin);
 
         if (updated) {
           // Logout all sessions for security after PIN change
@@ -246,8 +283,8 @@ public class UserAuthenticationService {
    * @param userId User ID
    * @return UserAuthentication without sensitive data, null if not found
    */
-  public UserAuthentication getUserProfile(Long userId) {
-    if (userId == null || userId <= 0) {
+  public UserAuthentication getUserProfile(int userId) {
+    if (userId <= 0) {
       logger.warn("Invalid user ID provided for profile retrieval");
       return null;
     }
@@ -278,7 +315,7 @@ public class UserAuthenticationService {
    * @return true if update successful, false otherwise
    */
   public boolean updateProfile(UserAuthentication userAuthentication) {
-    if (userAuthentication == null || userAuthentication.getId() == null) {
+    if (userAuthentication == null) {
       logger.warn("Invalid user data provided for profile update");
       return false;
     }

@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+//import java.util.UUID;
 import java.security.SecureRandom;
 import java.sql.Statement;
 
@@ -25,13 +25,13 @@ public class UserAuthenticationDAO {
   // SQL Queries for users table - Updated with new column names
   private static final String INSERT_USER = "INSERT INTO users (name, email, number, pin) VALUES (?, ?, ?, ?)";
 
-  private static final String SELECT_USER_BY_ID = "SELECT id, name, email, number, pin, createdDate, updatedDate FROM users WHERE id = ?";
+  private static final String SELECT_USER_BY_ID = "SELECT id, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE id = ?";
 
-  private static final String SELECT_USER_BY_EMAIL = "SELECT id, name, email, number, pin, createdDate, updatedDate FROM users WHERE email = ?";
+  private static final String SELECT_USER_BY_EMAIL = "SELECT id, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE email = ?";
 
-  private static final String SELECT_USER_BY_NUMBER = "SELECT id, name, email, number, pin, createdDate, updatedDate FROM users WHERE number = ?";
+  private static final String SELECT_USER_BY_NUMBER = "SELECT id, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE number = ?";
 
-  private static final String SELECT_USER_BY_EMAIL_OR_NUMBER = "SELECT id, name, email, number, pin, createdDate, updatedDate FROM users WHERE email = ? OR number = ?";
+  private static final String SELECT_USER_BY_EMAIL_OR_NUMBER = "SELECT id, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE email = ? OR number = ?";
 
   private static final String UPDATE_USER = "UPDATE users SET name = ?, email = ?, number = ?, updatedDate = datetime('now') WHERE id = ?";
 
@@ -43,14 +43,15 @@ public class UserAuthenticationDAO {
 
   private static final String COUNT_USERS = "SELECT COUNT(*) FROM users";
 
-  // SQL Queries for user_authentication table
-  private static final String INSERT_AUTH = "INSERT INTO user_authentication (user_id, token) VALUES (?, ?)";
+  // SQL Queries for users table
+  private static final String INSERT_AUTH = "UPDATE users SET token = ?, updatedDate = datetime('now') WHERE id = ?";
 
-  private static final String SELECT_AUTH_BY_TOKEN = "SELECT id, user_id, token, createdDate, updatedDate FROM user_authentication WHERE token = ?";
+  private static final String SELECT_AUTH_BY_TOKEN = "SELECT id, name, email, number, pin, token, createdDate, updatedDate "
+      + "FROM users WHERE token = ?";
 
-  private static final String DELETE_AUTH_BY_TOKEN = "DELETE FROM user_authentication WHERE token = ?";
+  private static final String DELETE_AUTH_BY_TOKEN = "DELETE FROM users WHERE token = ?";
 
-  private static final String DELETE_AUTH_BY_USER_ID = "DELETE FROM user_authentication WHERE user_id = ?";
+  private static final String DELETE_AUTH_BY_USER_ID = "DELETE FROM users WHERE id = ?";
 
   /**
    * Saves a new user to the database (Registration)
@@ -78,7 +79,7 @@ public class UserAuthenticationDAO {
             userAuth.setId(generatedKeys.getInt(1));
 
             // Retrieve the auto-generated dates
-            Optional<UserAuthentication> savedUser = findById((long) userAuth.getId());
+            Optional<UserAuthentication> savedUser = findById(userAuth.getId());
             if (savedUser.isPresent()) {
               userAuth.setCreatedDate(savedUser.get().getCreatedDate());
               userAuth.setUpdatedDate(savedUser.get().getUpdatedDate());
@@ -115,6 +116,7 @@ public class UserAuthenticationDAO {
 
       // Verify PIN
       if (pin.equals(user.getPin())) {
+
         // Generate and save authentication token
         String token = generateToken();
 
@@ -142,30 +144,41 @@ public class UserAuthenticationDAO {
   public Optional<UserAuthentication> validateToken(String token) {
     logger.debug("Validating token");
 
+    if (token == null || token.trim().isEmpty()) {
+      logger.warn("Empty token provided for validation");
+      return Optional.empty();
+    }
+
     try (Connection connection = ConnectionFactory.getConnection();
         PreparedStatement statement = connection.prepareStatement(SELECT_AUTH_BY_TOKEN)) {
 
-      statement.setString(1, token);
+      logger.debug("Validating token: {}", token);
+      statement.setString(1, token.trim());
 
       try (ResultSet resultSet = statement.executeQuery()) {
         if (resultSet.next()) {
-          int userId = resultSet.getInt("user_id");
+          UserAuthentication user = mapResultSetToUser(resultSet);
+          logger.debug("Token validated for user: {}", user.getId());
+          return Optional.of(user);
 
-          // Get user details
-          Optional<UserAuthentication> userOpt = findById((long) userId);
-          if (userOpt.isPresent()) {
-            UserAuthentication user = userOpt.get();
-            user.setToken(token);
-            logger.debug("Token validated for user: {}", userId);
-            return Optional.of(user);
-          }
+          // int userId = resultSet.getInt("user_id");
+
+          // // Get user details
+          // Optional<UserAuthentication> userOpt = findById(userId);
+          // if (userOpt.isPresent()) {
+          // UserAuthentication user = userOpt.get();
+          // user.setToken(token);
+          // logger.debug("Token validated for user: {}", userId);
+          // return Optional.of(user);
+          // }
+        } else {
+          logger.warn("Token not found in database: {}", token);
+          return Optional.empty();
         }
       }
-
     } catch (SQLException e) {
       logger.error("Error validating token", e);
     }
-
     logger.debug("Invalid token");
     return Optional.empty();
   }
@@ -204,7 +217,7 @@ public class UserAuthenticationDAO {
    * @param userId User ID
    * @return true if logout was successful
    */
-  public boolean logoutAll(Integer userId) {
+  public boolean logoutAll(int userId) {
     logger.debug("Logging out all sessions for user: {}", userId);
 
     try (Connection connection = ConnectionFactory.getConnection();
@@ -231,18 +244,18 @@ public class UserAuthenticationDAO {
    */
   private String generateToken() {
     // Option 1: UUID-based token (simpler)
-    return UUID.randomUUID().toString().replace("-", "");
+    // return UUID.randomUUID().toString().replace("-", "");
 
     // Option 2: More secure random token (uncomment if preferred)
-    /*
-     * byte[] randomBytes = new byte[32];
-     * secureRandom.nextBytes(randomBytes);
-     * StringBuilder token = new StringBuilder();
-     * for (byte b : randomBytes) {
-     * token.append(String.format("%02x", b));
-     * }
-     * return token.toString();
-     */
+
+    byte[] randomBytes = new byte[32];
+    secureRandom.nextBytes(randomBytes);
+    StringBuilder token = new StringBuilder();
+    for (byte b : randomBytes) {
+      token.append(String.format("%02x", b));
+    }
+    return token.toString();
+
   }
 
   /**
@@ -252,18 +265,80 @@ public class UserAuthenticationDAO {
    * @param token  Authentication token
    * @return true if save was successful
    */
-  private boolean saveAuthenticationToken(Integer userId, String token) {
+  private boolean saveAuthenticationToken(int userId, String token) {
+    // try (Connection connection = ConnectionFactory.getConnection();
+    // PreparedStatement statement = connection.prepareStatement(INSERT_AUTH)) {
+
+    // statement.setString(2, token);
+    // statement.setInt(1, userId);
+
+    // int affectedRows = statement.executeUpdate();
+    // return affectedRows > 0;
+
+    // } catch (SQLException e) {
+    // logger.error("Error saving authentication token for user: {}", userId, e);
+    // return false;
+    // }
+
+    // Connection connection = null;
+    // try {
+    // connection = ConnectionFactory.getConnection();
+    // connection.setAutoCommit(false);
+
+    // try (PreparedStatement statement = connection.prepareStatement(INSERT_AUTH))
+    // {
+    // statement.setString(1, token);
+    // statement.setInt(2, userId);
+
+    // int affectedRows = statement.executeUpdate();
+    // if (affectedRows > 0) {
+    // connection.commit();
+    // return true;
+    // }
+    // connection.rollback();
+    // return false;
+    // }
+    // } catch (SQLException e) {
+    // if (connection != null) {
+    // try {
+    // connection.rollback();
+    // } catch (SQLException ex) {
+    // }
+    // }
+    // logger.error("Error saving token", e);
+    // return false;
+    // } finally {
+    // if (connection != null) {
+    // try {
+    // connection.close();
+    // } catch (SQLException e) {
+    // }
+    // }
+    // }
+
     try (Connection connection = ConnectionFactory.getConnection();
         PreparedStatement statement = connection.prepareStatement(INSERT_AUTH)) {
 
-      statement.setInt(1, userId);
-      statement.setString(2, token);
+      // Add debug logging
+      logger.debug("Saving token for user {}: {}", userId, token);
+
+      // Ensure parameters are in correct order
+      statement.setString(1, token); // First parameter is token
+      statement.setInt(2, userId); // Second parameter is userId
 
       int affectedRows = statement.executeUpdate();
-      return affectedRows > 0;
+
+      // Verify the update worked
+      if (affectedRows > 0) {
+        logger.debug("Token saved successfully for user {}", userId);
+        return true;
+      } else {
+        logger.error("No rows affected when saving token for user {}", userId);
+        return false;
+      }
 
     } catch (SQLException e) {
-      logger.error("Error saving authentication token for user: {}", userId, e);
+      logger.error("Error saving token for user {}: {}", userId, e.getMessage());
       return false;
     }
   }
@@ -274,13 +349,13 @@ public class UserAuthenticationDAO {
    * @param id User ID
    * @return Optional containing the user, or empty if not found
    */
-  public Optional<UserAuthentication> findById(Long id) {
+  public Optional<UserAuthentication> findById(int id) {
     logger.debug("Finding user by ID: {}", id);
 
     try (Connection connection = ConnectionFactory.getConnection();
         PreparedStatement statement = connection.prepareStatement(SELECT_USER_BY_ID)) {
 
-      statement.setLong(1, id);
+      statement.setInt(1, id);
 
       try (ResultSet resultSet = statement.executeQuery()) {
         if (resultSet.next()) {
@@ -404,7 +479,7 @@ public class UserAuthenticationDAO {
       statement.setString(1, user.getName());
       statement.setString(2, user.getEmail());
       statement.setString(3, user.getNumber());
-      statement.setLong(4, user.getId());
+      statement.setInt(4, user.getId());
 
       int affectedRows = statement.executeUpdate();
 
@@ -427,14 +502,14 @@ public class UserAuthenticationDAO {
    * @param newPin New PIN
    * @return true if update was successful
    */
-  public boolean updatePin(Long userId, String newPin) {
+  public boolean updatePin(int userId, String newPin) {
     logger.debug("Updating PIN for user: {}", userId);
 
     try (Connection connection = ConnectionFactory.getConnection();
         PreparedStatement statement = connection.prepareStatement(UPDATE_PIN)) {
 
       statement.setString(1, newPin);
-      statement.setLong(2, userId);
+      statement.setInt(2, userId);
 
       int affectedRows = statement.executeUpdate();
 
@@ -456,13 +531,13 @@ public class UserAuthenticationDAO {
    * @param id User ID
    * @return true if deletion was successful
    */
-  public boolean delete(Long id) {
+  public boolean delete(int id) {
     logger.debug("Deleting user: {}", id);
 
     try (Connection connection = ConnectionFactory.getConnection();
         PreparedStatement statement = connection.prepareStatement(DELETE_USER)) {
 
-      statement.setLong(1, id);
+      statement.setInt(1, id);
 
       int affectedRows = statement.executeUpdate();
 
@@ -509,13 +584,13 @@ public class UserAuthenticationDAO {
    * 
    * @return User count
    */
-  public long count() {
+  public int count() {
     try (Connection connection = ConnectionFactory.getConnection();
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(COUNT_USERS)) {
 
       if (resultSet.next()) {
-        return resultSet.getLong(1);
+        return resultSet.getInt(1);
       }
 
     } catch (SQLException e) {
@@ -534,15 +609,14 @@ public class UserAuthenticationDAO {
    */
   private UserAuthentication mapResultSetToUser(ResultSet resultSet) throws SQLException {
     UserAuthentication user = new UserAuthentication();
-
     user.setId(resultSet.getInt("id"));
     user.setName(resultSet.getString("name"));
     user.setEmail(resultSet.getString("email"));
     user.setNumber(resultSet.getString("number"));
     user.setPin(resultSet.getString("pin"));
+    user.setToken(resultSet.getString("token"));
     user.setCreatedDate(resultSet.getString("createdDate"));
     user.setUpdatedDate(resultSet.getString("updatedDate"));
-
     return user;
   }
 }

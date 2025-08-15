@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class UserAuthentication {
 
-  private Integer id;
+  private int id;
   private String name;
   private String email;
   private String number;
@@ -26,7 +26,7 @@ public class UserAuthentication {
   }
 
   // Full constructor (for reading from DB)
-  public UserAuthentication(Integer id, String name, String email, String number, String pin, String createdDate,
+  public UserAuthentication(int id, String name, String email, String number, String pin, String createdDate,
       String updatedDate) {
     setId(id);
     setName(name);
@@ -39,11 +39,11 @@ public class UserAuthentication {
   }
 
   // Getters & Setters
-  public Integer getId() {
+  public int getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(int id) {
     this.id = id;
   }
 
