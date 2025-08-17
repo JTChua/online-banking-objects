@@ -177,6 +177,12 @@
                   <mainClass>com.tesdaciicc.FinalVerificationTest</mainClass>
               </configuration>
           </execution>
+          <execution>
+              <id>run-compre-test</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.ComprehensiveBalanceTest</mainClass>
+              </configuration>
+          </execution>
     </executions>
         </plugin>
       </plugins>
