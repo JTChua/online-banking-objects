@@ -23,6 +23,8 @@ public class Config {
   public static final String DATABASE_NAME = "gcashapp.db";
   public static final String DATABASE_URL = "jdbc:sqlite:./gcashapp.db";
   public static final String INIT_SQL_FILE = "/sql/001_init.sql";
+  public static final String INDEX_SQL_FILE = "/sql/002_indexes.sql";
+  public static final String DATA_SQL_FILE = "/sql/003_data.sql";
 
   // Application settings
   public static final String APP_NAME = "GCash App";

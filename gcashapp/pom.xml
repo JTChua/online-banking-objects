@@ -148,15 +148,33 @@
               </configuration>
           </execution>
           <execution>
-              <id>run-fresh-setup</id>
+              <id>run-edb-debug</id>
               <configuration>
-                  <mainClass>com.tesdaciicc.FreshDatabaseSetup</mainClass>
+                  <mainClass>com.tesdaciicc.EnhancedDatabaseDebugTest</mainClass>
               </configuration>
           </execution>
           <execution>
               <id>run-balance-test</id>
               <configuration>
                   <mainClass>com.tesdaciicc.SimpleBalanceTest</mainClass>
+              </configuration>
+          </execution>
+          <execution>
+              <id>run-db-debug</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.DatabaseDebugTest</mainClass>
+              </configuration>
+          </execution>
+          <execution>
+              <id>run-dsql-debug</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.DetailedSqlDebug</mainClass>
+              </configuration>
+          </execution>
+          <execution>
+              <id>run-fdb-test</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.FinalVerificationTest</mainClass>
               </configuration>
           </execution>
     </executions>
