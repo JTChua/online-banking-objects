@@ -17,3 +17,15 @@ CREATE TABLE IF NOT EXISTS balance (
     updatedDate TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (user_ID) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS transaction (
+    transactionId INTEGER PRIMARY KEY AUTOINCREMENT,
+    transactionAmount REAL NOT NULL CHECK (transactionAmount > 0),
+    name TEXT NOT NULL,
+    userId INTEGER NOT NULL,
+    transactionDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    transferToAccountNo TEXT,
+    transferFromAccountNo TEXT,
+    accountNumber TEXT NOT NULL,
+    FOREIGN KEY (userId) REFERENCES users(id)
+);

@@ -24,3 +24,10 @@ INSERT OR IGNORE INTO balance (user_ID, amount) VALUES
     (8, 3250.40),
     (9, 7800.80),
     (10, 18500.30);
+
+    INSERT INTO transaction (transactionAmount, name, userId, transferToAccountNo, transferFromAccountNo, accountNumber)
+VALUES 
+    (100.00, 'John Doe', 1, '1001', 'CASH_IN_SOURCE', '1001'),
+    (1000.00, 'Jane Smith', 1, '1001', 'CASH_IN_SOURCE', '1001'),
+    (300.00, 'Bob Johnson', 2, '1002', 'CASH_IN_SOURCE', '1002'),
+    (3500.00, 'Alice Brown', 2, '1002', 'CASH_IN_SOURCE', '1002');
