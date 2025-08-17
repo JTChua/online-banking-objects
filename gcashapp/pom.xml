@@ -129,9 +129,32 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
           <version>3.5.1</version>
-          <configuration>
-            <mainClass>com.tesdaciicc.App</mainClass>
-          </configuration>
+          <executions>
+          <execution>
+              <id>run-app</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.App</mainClass>
+              </configuration>
+          </execution>
+          <execution>
+              <id>run-db-reset</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.DatabaseReset</mainClass>
+              </configuration>
+          </execution>
+          <execution>
+              <id>run-fresh-setup</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.FreshDatabaseSetup</mainClass>
+              </configuration>
+          </execution>
+          <execution>
+              <id>run-balance-test</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.SimpleBalanceTest</mainClass>
+              </configuration>
+          </execution>
+    </executions>
         </plugin>
       </plugins>
     </pluginManagement>
