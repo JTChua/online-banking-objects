@@ -44,7 +44,7 @@ public class SimpleBalanceTest {
             COALESCE(AVG(amount), 0) as avg_amount,
             COALESCE(MIN(amount), 0) as min_amount,
             COALESCE(MAX(amount), 0) as max_amount
-        FROM Balance
+        FROM balance
         """;
 
     try (Connection conn = ConnectionFactory.getConnection();
@@ -80,7 +80,7 @@ public class SimpleBalanceTest {
 
     String query = """
         SELECT b.id, b.user_ID, b.amount, u.name
-        FROM Balance b
+        FROM balance b
         LEFT JOIN users u ON b.user_ID = u.id
         LIMIT 5
         """;
@@ -136,7 +136,7 @@ public class SimpleBalanceTest {
 
     // Get first user to test with
     try (Connection conn = ConnectionFactory.getConnection();
-        PreparedStatement stmt = conn.prepareStatement("SELECT user_ID FROM Balance LIMIT 1");
+        PreparedStatement stmt = conn.prepareStatement("SELECT user_ID FROM balance LIMIT 1");
         ResultSet rs = stmt.executeQuery()) {
 
       if (rs.next()) {

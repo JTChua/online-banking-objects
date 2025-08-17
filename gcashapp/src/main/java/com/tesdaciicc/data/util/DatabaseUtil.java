@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.net.URL;
 
 /**
  * Utility class for database operations and initialization
@@ -30,26 +31,30 @@ public class DatabaseUtil {
    * @return true if initialization is successful
    */
   public static boolean initializeDatabase() {
-    try {
-      logger.info("Initializing database...");
+     try {
+        logger.info("Initializing database...");
+        ensureDatabaseFolderExists();
 
-      ensureDatabaseFolderExists();
+        // Simple version without URL checking
+        InputStream sqlStream = DatabaseUtil.class.getResourceAsStream(Config.INIT_SQL_FILE);
+        if (sqlStream == null) {
+            logger.error("SQL resource not found: {}", Config.INIT_SQL_FILE);
+            return false;
+        }
+        sqlStream.close();
 
-      // Use Config constant instead of Config.get()
-      if (!runSqlFromResource(Config.INIT_SQL_FILE)) {
-        logger.error("Failed to run initialization SQL");
-        return false;
-      }
+        if (!runSqlFromResource(Config.INIT_SQL_FILE)) {
+            logger.error("Failed to run initialization SQL");
+            return false;
+        }
 
-      // Seed balance data if Balance table exists
-      seedBalanceData();
-
-      logger.info("Database initialized successfully");
-      return true;
+        seedBalanceData();
+        logger.info("Database initialized successfully");
+        return true;
 
     } catch (Exception e) {
-      logger.error("Database initialization failed", e);
-      return false;
+        logger.error("Database initialization failed", e);
+        return false;
     }
   }
 
@@ -118,23 +123,32 @@ public class DatabaseUtil {
    * @return true if all statements executed successfully
    */
   private static boolean executeMultipleStatements(String sql) {
-    String[] statements = sql.split(";");
-
+    String[] statements = sql.split(";(?=(?:[^']*'[^']*')*[^']*$)"); // Split on semicolons not inside quotes
+    
     try (Connection connection = ConnectionFactory.getConnection();
-        Statement statement = connection.createStatement()) {
-
-      for (String stmt : statements) {
-        String trimmed = stmt.trim();
-        if (!trimmed.isEmpty() && !trimmed.startsWith("--")) {
-          statement.execute(trimmed);
-          logger.debug("Executed SQL: {}", trimmed.substring(0, Math.min(50, trimmed.length())));
+         Statement statement = connection.createStatement()) {
+        
+        connection.setAutoCommit(false); // Start transaction
+        
+        for (String stmt : statements) {
+            String trimmed = stmt.trim();
+            if (!trimmed.isEmpty() && !trimmed.startsWith("--")) {
+                try {
+                    statement.execute(trimmed);
+                    logger.debug("Executed SQL: {}", trimmed.substring(0, Math.min(50, trimmed.length())));
+                } catch (SQLException e) {
+                    logger.error("Failed to execute statement: {}", trimmed, e);
+                    connection.rollback();
+                    return false;
+                }
+            }
         }
-      }
-      return true;
-
+        connection.commit(); // Commit transaction
+        return true;
+        
     } catch (SQLException e) {
-      logger.error("Failed to execute SQL statements", e);
-      return false;
+        logger.error("Failed to execute SQL statements", e);
+        return false;
     }
   }
 
@@ -161,7 +175,7 @@ public class DatabaseUtil {
    */
   private static void seedBalanceData() {
     // Check if Balance table exists first
-    if (!tableExists("Balance")) {
+    if (!tableExists("balance")) {
       logger.debug("Balance table doesn't exist, skipping balance seeding");
       return;
     }
@@ -169,8 +183,8 @@ public class DatabaseUtil {
     logger.debug("Seeding balance data...");
 
     String getUsersSql = "SELECT id FROM users";
-    String checkBalanceSql = "SELECT COUNT(*) FROM Balance WHERE user_ID = ?";
-    String insertSql = "INSERT INTO Balance (amount, user_ID) VALUES (?, ?)";
+    String checkBalanceSql = "SELECT COUNT(*) FROM balance WHERE user_ID = ?";
+    String insertSql = "INSERT INTO balance (amount, user_ID) VALUES (?, ?)";
 
     Random random = new Random();
 
@@ -241,7 +255,7 @@ public class DatabaseUtil {
     try (Connection connection = ConnectionFactory.getConnection();
         Statement statement = connection.createStatement()) {
 
-      statement.execute("DROP TABLE IF EXISTS Balance");
+      statement.execute("DROP TABLE IF EXISTS balance");
       statement.execute("DROP TABLE IF EXISTS users");
       logger.info("All tables dropped successfully");
       return true;

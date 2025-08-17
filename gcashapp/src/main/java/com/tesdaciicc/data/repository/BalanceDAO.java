@@ -16,15 +16,15 @@ public class BalanceDAO {
   private static final Logger logger = LoggerFactory.getLogger(BalanceDAO.class);
 
   // SQL queries matching your existing Balance table schema
-  private static final String SELECT_BALANCE_BY_USER_ID = "SELECT id, user_ID, amount, createdDate, updatedDate FROM Balance WHERE user_ID = ?";
+  private static final String SELECT_BALANCE_BY_USER_ID = "SELECT id, user_ID, amount, createdDate, updatedDate FROM balance WHERE user_ID = ?";
 
-  private static final String SELECT_ALL_BALANCES = "SELECT id, user_ID, amount, createdDate, updatedDate FROM Balance";
+  private static final String SELECT_ALL_BALANCES = "SELECT id, user_ID, amount, createdDate, updatedDate FROM balance";
 
-  private static final String INSERT_BALANCE = "INSERT INTO Balance (amount, user_ID) VALUES (?, ?)";
+  private static final String INSERT_BALANCE = "INSERT INTO balance (amount, user_ID) VALUES (?, ?)";
 
-  private static final String UPDATE_BALANCE = "UPDATE Balance SET amount = ?, updatedDate = datetime('now') WHERE user_ID = ?";
+  private static final String UPDATE_BALANCE = "UPDATE balance SET amount = ?, updatedDate = datetime('now') WHERE user_ID = ?";
 
-  private static final String DELETE_BALANCE = "DELETE FROM Balance WHERE user_ID = ?";
+  private static final String DELETE_BALANCE = "DELETE FROM balance WHERE user_ID = ?";
 
   /**
    * Find balance by user ID

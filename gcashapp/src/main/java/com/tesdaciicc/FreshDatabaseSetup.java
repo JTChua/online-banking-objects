@@ -100,7 +100,7 @@ public class FreshDatabaseSetup {
 
         // Create Balance table (matching your existing schema)
         String createBalanceTable = """
-            CREATE TABLE IF NOT EXISTS Balance (
+            CREATE TABLE IF NOT EXISTS balance (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_ID INTEGER NOT NULL,
                 amount REAL NOT NULL DEFAULT 0.0,
@@ -116,7 +116,7 @@ public class FreshDatabaseSetup {
         // Create indexes for performance
         stmt.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
         stmt.execute("CREATE INDEX IF NOT EXISTS idx_users_number ON users(number)");
-        stmt.execute("CREATE INDEX IF NOT EXISTS idx_balance_user_id ON Balance(user_ID)");
+        stmt.execute("CREATE INDEX IF NOT EXISTS idx_balance_user_id ON balance(user_ID)");
         System.out.println("✅ Database indexes created");
 
         // Insert test user
@@ -143,7 +143,7 @@ public class FreshDatabaseSetup {
     }
 
     // Insert test balance
-    String insertBalanceSQL = "INSERT OR IGNORE INTO Balance (user_ID, amount) VALUES (1, 5000.00)";
+    String insertBalanceSQL = "INSERT OR IGNORE INTO balance (user_ID, amount) VALUES (1, 5000.00)";
     try (PreparedStatement pstmt = conn.prepareStatement(insertBalanceSQL)) {
       pstmt.executeUpdate();
       System.out.println("✅ Test balance inserted");
@@ -180,7 +180,7 @@ public class FreshDatabaseSetup {
       userRs.close();
 
       // Check balance count
-      ResultSet balanceRs = stmt.executeQuery("SELECT COUNT(*) as count FROM Balance");
+      ResultSet balanceRs = stmt.executeQuery("SELECT COUNT(*) as count FROM balance");
       if (balanceRs.next()) {
         System.out.println("💰 Total balance records: " + balanceRs.getInt("count"));
       }
@@ -200,7 +200,7 @@ public class FreshDatabaseSetup {
     String query = """
         SELECT u.id, u.name, u.email, b.amount
         FROM users u
-        LEFT JOIN Balance b ON u.id = b.user_ID
+        LEFT JOIN balance b ON u.id = b.user_ID
         LIMIT 5
         """;
 

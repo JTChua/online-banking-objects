@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Balance table: stores user balance information
 -- Note: This matches the existing schema from FreshDatabaseSetup.java
-CREATE TABLE IF NOT EXISTS Balance (
+CREATE TABLE IF NOT EXISTS balance (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_ID INTEGER NOT NULL,
     amount REAL NOT NULL DEFAULT 0.0,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Balance (
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_number ON users(number);
-CREATE INDEX IF NOT EXISTS idx_balance_user_id ON Balance(user_ID);
+CREATE INDEX IF NOT EXISTS idx_balance_user_id ON balance(user_ID);
 
 -- Insert dummy users (using INSERT OR IGNORE to avoid conflicts)
 INSERT OR IGNORE INTO users (id, name, email, number, pin) VALUES
@@ -45,7 +45,7 @@ INSERT OR IGNORE INTO users (id, name, email, number, pin) VALUES
 -- Insert balance dummy data (using INSERT OR IGNORE to avoid conflicts)
 -- Note: The DatabaseUtil.seedBalanceData() method will handle this automatically
 -- but we include some manual entries here for immediate testing
-INSERT OR IGNORE INTO Balance (user_ID, amount) VALUES
+INSERT OR IGNORE INTO balance (user_ID, amount) VALUES
     (1, 15000.50),
     (2, 8750.25),
     (3, 25000.00),
