@@ -183,6 +183,12 @@
                   <mainClass>com.tesdaciicc.ComprehensiveBalanceTest</mainClass>
               </configuration>
           </execution>
+          <execution>
+              <id>run-conn-test</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.ConnectionTest</mainClass>
+              </configuration>
+          </execution>
     </executions>
         </plugin>
       </plugins>

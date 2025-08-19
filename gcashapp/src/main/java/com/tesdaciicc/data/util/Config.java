@@ -1,27 +1,28 @@
 package com.tesdaciicc.data.util;
 
-import java.io.IOException;
-import java.io.InputStream;
+// import java.io.IOException;
+// import java.io.InputStream;
 import java.util.Properties;
 
 public class Config {
-  private static final Properties props = new Properties();
+  private static final Properties properties = new Properties();
 
-  static {
-    try (InputStream input = Config.class.getClassLoader()
-        .getResourceAsStream("config.properties")) {
-      if (input == null) {
-        throw new RuntimeException("config.properties not found in resources folder");
-      }
-      props.load(input);
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to load config.properties", e);
-    }
-  }
+  // static {
+  //   try (InputStream input = Config.class.getClassLoader()
+  //       .getResourceAsStream("config.properties")) {
+  //     if (input == null) {
+  //       throw new RuntimeException("config.properties not found in resources folder");
+  //     }
+  //     properties.load(input);
+  //   } catch (IOException e) {
+  //     throw new RuntimeException("Failed to load config.properties", e);
+  //   }
+  // }
 
   // Database configuration - Fixed to use full path
   public static final String DATABASE_NAME = "gcashapp.db";
   public static final String DATABASE_URL = "jdbc:sqlite:./gcashapp.db";
+  public static final String DATABASE_DRIVER = "org.sqlite.JDBC";
   public static final String INIT_SQL_FILE = "/sql/001_init.sql";
   public static final String INDEX_SQL_FILE = "/sql/002_indexes.sql";
   public static final String DATA_SQL_FILE = "/sql/003_data.sql";
@@ -47,6 +48,14 @@ public class Config {
   }
 
   public static String get(String key) {
-    return props.getProperty(key);
+    return properties.getProperty(key);
   }
+
+  public static String getDbUrl() {
+        return properties.getProperty("DATABASE_URL", "jdbc:sqlite:./gcashapp.db");
+    }
+    
+  public static String getDbDriver() {
+        return properties.getProperty("DATABASE_DRIVER", "org.sqlite.JDBC");
+    }
 }

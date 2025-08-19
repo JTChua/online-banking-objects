@@ -1,4 +1,4 @@
--- 003_data.sql (remove BEGIN/COMMIT)
+
 -- Insert dummy users
 INSERT OR IGNORE INTO users (id, name, email, number, pin) VALUES
     (1, 'John Doe', 'john.doe@email.com', '09123456789', '1234'),

@@ -3,17 +3,19 @@ package com.tesdaciicc.data.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class ConnectionFactory {
-  private static final Logger logger = LoggerFactory.getLogger(ConnectionFactory.class);
 
+public class ConnectionFactory {
+  private static final Logger logger = LoggerFactory.getLogger(ConnectionFactory.class.getName());
+  private static ConnectionFactory instance = null;
   private static final String DB_URL;
 
   static {
-    String rawUrl = Config.DATABASE_URL;
+    String rawUrl = Config.getDbUrl();
 
     if (rawUrl.startsWith("jdbc:sqlite:")) {
       String pathPart = rawUrl.substring("jdbc:sqlite:".length());
@@ -21,7 +23,8 @@ public class ConnectionFactory {
       // If path is relative (starts with ./ or doesn't start with /)
       if (!pathPart.startsWith("/")) {
         String basePath = System.getProperty("user.dir");
-        pathPart = basePath + "/" + pathPart.replaceFirst("^\\./", "");
+        //pathPart = basePath + "/" + pathPart.replaceFirst("^\\./", "");
+        pathPart = basePath + File.separator + pathPart.replaceFirst("^\\.\\" + File.separator, "");
       }
 
       DB_URL = "jdbc:sqlite:" + pathPart;
@@ -33,8 +36,22 @@ public class ConnectionFactory {
   }
 
   private ConnectionFactory() {
-    // Utility class - prevent instantiation
+    try {
+      // Load the SQLite JDBC driver
+      Class.forName(Config.getDbDriver());
+    } catch (ClassNotFoundException e) {
+      logger.error("SQLite JDBC driver not found", e);
+      throw new RuntimeException("Database driver not found", e);
+    }
   }
+
+  // Singleton pattern to ensure only one instance exists
+    public static synchronized ConnectionFactory getInstance() {
+        if (instance == null) {
+            instance = new ConnectionFactory();
+        }
+        return instance;
+    }
 
   /**
    * Creates a new database connection
@@ -44,17 +61,17 @@ public class ConnectionFactory {
    */
   public static Connection getConnection() throws SQLException {
     try {
-      // Load SQLite JDBC driver
-      Class.forName("org.sqlite.JDBC");
+        // Load SQLite JDBC driver
+        Class.forName(Config.getDbDriver());
 
-      // Create connection using resolved path
-      Connection connection = DriverManager.getConnection(DB_URL);
+        // Create connection using resolved path
+        Connection connection = DriverManager.getConnection(DB_URL);
 
-      // Enable foreign key constraints
-      connection.createStatement().execute("PRAGMA foreign_keys = ON");
+        // Enable foreign key constraints
+        connection.createStatement().execute("PRAGMA foreign_keys = ON");
 
-      logger.debug("Database connection established: {}", DB_URL);
-      return connection;
+        logger.debug("Database connection established: {}", DB_URL);
+        return connection;
 
     } catch (ClassNotFoundException e) {
       logger.error("SQLite JDBC driver not found", e);
@@ -72,7 +89,7 @@ public class ConnectionFactory {
    */
   public static boolean testConnection() {
     try (Connection connection = getConnection()) {
-      return connection.isValid(5); // 5 second timeout
+      return connection != null && !connection.isClosed() && connection.isValid(5); // 5 second timeout
     } catch (SQLException e) {
       logger.error("Database connection test failed", e);
       return false;
@@ -94,4 +111,10 @@ public class ConnectionFactory {
       }
     }
   }
+
+  // Get connection info for debugging
+  public String getConnectionInfo() {
+      return "Driver: " + Config.getDbDriver() + ", URL: " + Config.getDbUrl();
+  }
+
 }
