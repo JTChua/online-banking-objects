@@ -26,6 +26,7 @@ public class BalanceDAO {
 
   private static final String DELETE_BALANCE = "DELETE FROM balance WHERE userId = ?";
 
+
   /**
    * Find balance by user ID
    * 
@@ -54,6 +55,7 @@ public class BalanceDAO {
     logger.debug("No balance found for userId: {}", userId);
     return Optional.empty();
   }
+
 
   /**
    * Get all balances

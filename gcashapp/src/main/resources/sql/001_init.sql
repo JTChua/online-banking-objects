@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS balance (
     balanceAmount REAL NOT NULL DEFAULT 0.00,
     createdDate TEXT NOT NULL DEFAULT (datetime('now')),
     updatedDate TEXT NOT NULL DEFAULT (datetime('now')),
-    --accountNumber TEXT UNIQUE,
     FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 

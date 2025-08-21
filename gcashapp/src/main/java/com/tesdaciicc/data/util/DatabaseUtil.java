@@ -244,7 +244,8 @@ public class DatabaseUtil {
             // Verify indexes
             String[] requiredIndexes = {
                 "idx_users_email",
-                "idx_users_number", 
+                "idx_users_number",
+                "idx_users_token",
                 "idx_balance_userId",
                 "idx_transactions_userId",
                 "idx_transactions_accountNumber",
