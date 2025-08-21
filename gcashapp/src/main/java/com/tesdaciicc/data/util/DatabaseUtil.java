@@ -59,11 +59,10 @@ public class DatabaseUtil {
         logger.debug("Creating indexes from {}", Config.INDEX_SQL_FILE);
         
         // Verify tables exist first
-        if (!tableExists("users") || !tableExists("balance")) {
+        if (!tableExists("users") || !tableExists("balance") || !tableExists("transactions")) {
             logger.error("Cannot create indexes - tables not found");
             return false;
         }
-        
         return runSqlFromResource(Config.INDEX_SQL_FILE);
     }
 
@@ -80,18 +79,40 @@ public class DatabaseUtil {
             logger.error("Cannot insert data - balance table not found");
             return false;
         }
+
+        if (!tableExists("transactions")) {
+            logger.error("Cannot insert data - transactions table not found");
+            return false;
+        }
         
         // Check if data already exists
         try (Connection conn = ConnectionFactory.getConnection();
              Statement stmt = conn.createStatement()) {
             
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users");
-            if (rs.next() && rs.getInt(1) > 0) {
+            ResultSet rsUsers = stmt.executeQuery("SELECT COUNT(*) FROM users");
+            if (rsUsers.next() && rsUsers.getInt(1) > 0) {
                 logger.info("Users table already contains data, skipping insertion");
                 return true;
             }
-            rs.close();
-            
+            logger.info("No existing data found in users table, proceeding with insertion");
+            rsUsers.close(); 
+
+            ResultSet rsBalance = stmt.executeQuery("SELECT COUNT(*) FROM balance");
+            if (rsBalance.next() && rsBalance.getInt(1) > 0) {
+                logger.info("Balance table already contains data, skipping insertion");
+                return true;
+            }
+            logger.info("No existing data found in balance table, proceeding with insertion");
+            rsBalance.close();
+
+            ResultSet rsTransactions = stmt.executeQuery("SELECT COUNT(*) FROM transactions");
+            if (rsTransactions.next() && rsTransactions.getInt(1) > 0) {
+                logger.info("Transaction table already contains data, skipping insertion");
+                return true;
+            }
+            logger.info("No existing data found in transactions table, proceeding with insertion");
+            rsTransactions.close();
+
         } catch (SQLException e) {
             logger.error("Error checking existing data", e);
             return false;
@@ -111,7 +132,25 @@ public class DatabaseUtil {
                     rs.close();
                     return true;
                 }
-                rs.close();
+                rs.close(); 
+                logger.warn("SQL file insertion successful, but no data was inserted");
+
+                ResultSet rsBalance = stmt.executeQuery("SELECT COUNT(*) FROM balance");
+                if (rsBalance.next() && rsBalance.getInt(1) > 0) {
+                    logger.info("SQL file insertion successful - {} balances inserted", rsBalance.getInt(1));
+                    rsBalance.close();
+                    return true;
+                }
+                rsBalance.close();
+
+                ResultSet rsTransactions = stmt.executeQuery("SELECT COUNT(*) FROM transactions");
+                if (rsTransactions.next() && rsTransactions.getInt(1) > 0) {
+                    logger.info("SQL file insertion successful - {} transactions inserted", rsTransactions.getInt(1));
+                    rsTransactions.close();
+                    return true;
+                }
+                rsTransactions.close();
+
             } catch (SQLException e) {
                 logger.error("Error verifying SQL file insertion", e);
             }
@@ -132,7 +171,7 @@ public class DatabaseUtil {
             conn.setAutoCommit(false);
             
             // Insert users first
-            String userSql = "INSERT INTO users (id, name, email, number, pin) VALUES (?, ?, ?, ?, ?)";
+            String userSql = "INSERT INTO users (userId, name, email, number, pin) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement userStmt = conn.prepareStatement(userSql)) {
                 
                 Object[][] users = {
@@ -163,7 +202,7 @@ public class DatabaseUtil {
             }
             
             // Insert balance data
-            String balanceSql = "INSERT INTO balance (user_ID, amount) VALUES (?, ?)";
+            String balanceSql = "INSERT INTO balance (userId, balanceAmount) VALUES (?, ?)";
             try (PreparedStatement balanceStmt = conn.prepareStatement(balanceSql)) {
                 
                 Object[][] balances = {
@@ -195,7 +234,7 @@ public class DatabaseUtil {
     public static void verifyInitialization() throws SQLException {
         try (Connection conn = ConnectionFactory.getConnection()) {
             // Verify tables
-            String[] requiredTables = {"users", "balance"};
+            String[] requiredTables = {"users", "balance", "transactions"};
             for (String table : requiredTables) {
                 if (!tableExists(table)) {
                     throw new SQLException("Table missing: " + table);
@@ -206,7 +245,10 @@ public class DatabaseUtil {
             String[] requiredIndexes = {
                 "idx_users_email",
                 "idx_users_number", 
-                "idx_balance_user_id"
+                "idx_balance_userId",
+                "idx_transactions_userId",
+                "idx_transactions_accountNumber",
+                "idx_transactions_date"
             };
             
             try (Statement stmt = conn.createStatement();
@@ -374,6 +416,8 @@ public class DatabaseUtil {
     public static boolean isDatabaseReady() {
         try (Connection connection = ConnectionFactory.getConnection()) {
             connection.createStatement().executeQuery("SELECT COUNT(*) FROM users").close();
+            connection.createStatement().executeQuery("SELECT COUNT(*) FROM balance").close();
+            connection.createStatement().executeQuery("SELECT COUNT(*) FROM transactions").close();
             logger.debug("Database is ready");
             return true;
         } catch (SQLException e) {
@@ -409,8 +453,8 @@ public class DatabaseUtil {
      */
     public static void verifyTablesExist() throws SQLException {
         try (Connection conn = ConnectionFactory.getConnection()) {
-            String[] requiredTables = {"users", "balance"};
-            
+            String[] requiredTables = {"users", "balance", "transactions"};
+
             for (String table : requiredTables) {
                 if (!tableExists(table)) {
                     throw new SQLException("Critical table missing: " + table);
@@ -429,9 +473,12 @@ public class DatabaseUtil {
 
         try (Connection connection = ConnectionFactory.getConnection();
              Statement statement = connection.createStatement()) {
-
+            
+            statement.execute("DROP TABLE IF EXISTS transactions");
             statement.execute("DROP TABLE IF EXISTS balance");
             statement.execute("DROP TABLE IF EXISTS users");
+
+
             logger.info("All tables dropped successfully");
             return true;
 

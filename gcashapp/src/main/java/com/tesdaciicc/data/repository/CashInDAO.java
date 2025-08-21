@@ -23,15 +23,15 @@ public class CashInDAO {
     
     // SQL queries matching your existing CashIn table schema
     private static final String INSERT_TRANSACTION = """
-        INSERT INTO transaction (transactionAmount, name, userId, transactionDate, 
+        INSERT INTO transactions (transactionAmount, name, userId, transactionDate, 
                                transferToAccountNo, transferFromAccountNo, accountNumber)VALUES (?, ?, ?, ?, ?, ?, ?)"""; 
 
-    private static final String SELECT_BY_ID = "SELECT * FROM transaction WHERE transactionId = ?";
-    private static final String SELECT_BY_USER_ID = "SELECT * FROM transaction WHERE userId = ? ORDER BY transactionDate DESC";
-    private static final String SELECT_BY_ACCOUNT_NUMBER = "SELECT * FROM transaction WHERE accountNumber = ? ORDER BY transactionDate DESC";
-    private static final String SELECT_ALL = "SELECT * FROM transaction ORDER BY transactionDate DESC";
-    private static final String SELECT_TOTAL_BY_USER_ID = "SELECT COALESCE(SUM(transactionAmount), 0) as total FROM transaction WHERE userId = ?";
-    private static final String COUNT_BY_USER_ID = "SELECT COUNT(*) as count FROM transaction WHERE userId = ?";
+    private static final String SELECT_BY_ID = "SELECT * FROM transactions WHERE transactionId = ?";
+    private static final String SELECT_BY_USER_ID = "SELECT * FROM transactions WHERE userId = ? ORDER BY transactionDate DESC";
+    private static final String SELECT_BY_ACCOUNT_NUMBER = "SELECT * FROM transactions WHERE accountNumber = ? ORDER BY transactionDate DESC";
+    private static final String SELECT_ALL = "SELECT * FROM transactions ORDER BY transactionDate DESC";
+    private static final String SELECT_TOTAL_BY_USER_ID = "SELECT COALESCE(SUM(transactionAmount), 0) as total FROM transactions WHERE userId = ?";
+    private static final String COUNT_BY_USER_ID = "SELECT COUNT(*) as count FROM transactions WHERE userId = ?";
 
     /**
      * Create a new cash-in transaction record

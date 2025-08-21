@@ -25,33 +25,33 @@ public class UserAuthenticationDAO {
   // SQL Queries for users table - Updated with new column names
   private static final String INSERT_USER = "INSERT INTO users (name, email, number, pin) VALUES (?, ?, ?, ?)";
 
-  private static final String SELECT_USER_BY_ID = "SELECT id, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE id = ?";
+  private static final String SELECT_USER_BY_ID = "SELECT userId, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE userId = ?";
 
-  private static final String SELECT_USER_BY_EMAIL = "SELECT id, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE email = ?";
+  private static final String SELECT_USER_BY_EMAIL = "SELECT userId, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE email = ?";
 
-  private static final String SELECT_USER_BY_NUMBER = "SELECT id, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE number = ?";
+  private static final String SELECT_USER_BY_NUMBER = "SELECT userId, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE number = ?";
 
-  private static final String SELECT_USER_BY_EMAIL_OR_NUMBER = "SELECT id, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE email = ? OR number = ?";
+  private static final String SELECT_USER_BY_EMAIL_OR_NUMBER = "SELECT userId, name, email, number, pin, token, createdDate, updatedDate FROM users WHERE email = ? OR number = ?";
 
-  private static final String UPDATE_USER = "UPDATE users SET name = ?, email = ?, number = ?, updatedDate = datetime('now') WHERE id = ?";
+  private static final String UPDATE_USER = "UPDATE users SET name = ?, email = ?, number = ?, updatedDate = datetime('now') WHERE userId = ?";
 
-  private static final String UPDATE_PIN = "UPDATE users SET pin = ?, updatedDate = datetime('now') WHERE id = ?";
+  private static final String UPDATE_PIN = "UPDATE users SET pin = ?, updatedDate = datetime('now') WHERE userId = ?";
 
-  private static final String DELETE_USER = "DELETE FROM users WHERE id = ?";
+  private static final String DELETE_USER = "DELETE FROM users WHERE userId = ?";
 
-  private static final String SELECT_ALL_USERS = "SELECT id, name, email, number, pin, createdDate, updatedDate FROM users ORDER BY createdDate DESC";
+  private static final String SELECT_ALL_USERS = "SELECT userId, name, email, number, pin, createdDate, updatedDate FROM users ORDER BY createdDate DESC";
 
   private static final String COUNT_USERS = "SELECT COUNT(*) FROM users";
 
   // SQL Queries for users table
-  private static final String INSERT_AUTH = "UPDATE users SET token = ?, updatedDate = datetime('now') WHERE id = ?";
+  private static final String INSERT_AUTH = "UPDATE users SET token = ?, updatedDate = datetime('now') WHERE userId = ?";
 
-  private static final String SELECT_AUTH_BY_TOKEN = "SELECT id, name, email, number, pin, token, createdDate, updatedDate "
+  private static final String SELECT_AUTH_BY_TOKEN = "SELECT userId, name, email, number, pin, token, createdDate, updatedDate "
       + "FROM users WHERE token = ?";
 
   private static final String DELETE_AUTH_BY_TOKEN = "DELETE FROM users WHERE token = ?";
 
-  private static final String DELETE_AUTH_BY_USER_ID = "DELETE FROM users WHERE id = ?";
+  private static final String DELETE_AUTH_BY_USER_ID = "DELETE FROM users WHERE userId = ?";
 
   /**
    * Saves a new user to the database (Registration)
@@ -609,7 +609,7 @@ public class UserAuthenticationDAO {
    */
   private UserAuthentication mapResultSetToUser(ResultSet resultSet) throws SQLException {
     UserAuthentication user = new UserAuthentication();
-    user.setId(resultSet.getInt("id"));
+    user.setId(resultSet.getInt("userId"));
     user.setName(resultSet.getString("name"));
     user.setEmail(resultSet.getString("email"));
     user.setNumber(resultSet.getString("number"));

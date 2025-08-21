@@ -16,15 +16,15 @@ public class BalanceDAO {
   private static final Logger logger = LoggerFactory.getLogger(BalanceDAO.class);
 
   // SQL queries matching your existing Balance table schema
-  private static final String SELECT_BALANCE_BY_USER_ID = "SELECT id, user_ID, amount, createdDate, updatedDate FROM balance WHERE user_ID = ?";
+  private static final String SELECT_BALANCE_BY_USER_ID = "SELECT balanceId, userId, balanceAmount, createdDate, updatedDate FROM balance WHERE userId = ?";
 
-  private static final String SELECT_ALL_BALANCES = "SELECT id, user_ID, amount, createdDate, updatedDate FROM balance";
+  private static final String SELECT_ALL_BALANCES = "SELECT balanceId, userId, balanceAmount, createdDate, updatedDate FROM balance";
 
-  private static final String INSERT_BALANCE = "INSERT INTO balance (amount, user_ID) VALUES (?, ?)";
+  private static final String INSERT_BALANCE = "INSERT INTO balance (balanceAmount, userId) VALUES (?, ?)";
 
-  private static final String UPDATE_BALANCE = "UPDATE balance SET amount = ?, updatedDate = datetime('now') WHERE user_ID = ?";
+  private static final String UPDATE_BALANCE = "UPDATE balance SET balanceAmount = ?, updatedDate = datetime('now') WHERE userId = ?";
 
-  private static final String DELETE_BALANCE = "DELETE FROM balance WHERE user_ID = ?";
+  private static final String DELETE_BALANCE = "DELETE FROM balance WHERE userId = ?";
 
   /**
    * Find balance by user ID
@@ -185,9 +185,9 @@ public class BalanceDAO {
    */
   private Balance mapResultSetToBalance(ResultSet rs) throws SQLException {
     return new Balance(
-        rs.getInt("id"), // Your existing 'id' column
-        rs.getInt("user_ID"), // Your existing 'user_ID' column
-        rs.getBigDecimal("amount"), // Your existing 'amount' column
+        rs.getInt("balanceId"), // Your existing 'id' column
+        rs.getInt("userId"), // Your existing 'userId' column
+        rs.getBigDecimal("balanceAmount"), // Your existing 'amount' column
         rs.getString("createdDate"), // Your existing 'createdDate' column
         rs.getString("updatedDate") // Your existing 'updatedDate' column
     );

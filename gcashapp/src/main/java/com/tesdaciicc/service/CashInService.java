@@ -30,7 +30,6 @@ public class CashInService {
     private final UserAuthenticationDAO userDAO;
     private final BalanceDAO balanceDAO;
 
-
     public CashInService() {
         this.cashInDAO = new CashInDAO();
         this.userDAO = new UserAuthenticationDAO();
@@ -236,5 +235,4 @@ public class CashInService {
 
         return true;
     }
-
 }

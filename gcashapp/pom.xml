@@ -189,6 +189,12 @@
                   <mainClass>com.tesdaciicc.ConnectionTest</mainClass>
               </configuration>
           </execution>
+          <execution>
+              <id>run-db-util-test</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.DatabaseUtilTest</mainClass>
+              </configuration>
+          </execution>
     </executions>
         </plugin>
       </plugins>

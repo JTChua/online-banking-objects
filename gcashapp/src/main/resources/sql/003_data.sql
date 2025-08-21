@@ -1,6 +1,6 @@
 
 -- Insert dummy users
-INSERT OR IGNORE INTO users (id, name, email, number, pin) VALUES
+INSERT OR IGNORE INTO users (userId, name, email, number, pin) VALUES
     (1, 'John Doe', 'john.doe@email.com', '09123456789', '1234'),
     (2, 'Jane Smith', 'jane.smith@email.com', '09987654321', '5678'),
     (3, 'Bob Johnson', 'bob.johnson@email.com', '09111222333', '9876'),
@@ -13,7 +13,7 @@ INSERT OR IGNORE INTO users (id, name, email, number, pin) VALUES
     (10, 'Helen Clark', 'helen.clark@email.com', '09666777888', '6666');
 
 -- Insert balance dummy data
-INSERT OR IGNORE INTO balance (user_ID, amount) VALUES
+INSERT OR IGNORE INTO balance (userId, balanceAmount) VALUES
     (1, 15000.50),
     (2, 8750.25),
     (3, 25000.00),
@@ -25,7 +25,7 @@ INSERT OR IGNORE INTO balance (user_ID, amount) VALUES
     (9, 7800.80),
     (10, 18500.30);
 
-    INSERT INTO transaction (transactionAmount, name, userId, transferToAccountNo, transferFromAccountNo, accountNumber)
+    INSERT INTO transactions (transactionAmount, transactionName, userId, transferToAccountNo, transferFromAccountNo, accountNumber)
 VALUES 
     (100.00, 'John Doe', 1, '1001', 'CASH_IN_SOURCE', '1001'),
     (1000.00, 'Jane Smith', 1, '1001', 'CASH_IN_SOURCE', '1001'),

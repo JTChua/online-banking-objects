@@ -1,7 +1,7 @@
 
 -- For users table
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     number TEXT NOT NULL UNIQUE CHECK(length(number) = 11),
@@ -13,23 +13,23 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- For balance table
 CREATE TABLE IF NOT EXISTS balance (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_ID INTEGER NOT NULL,
-    amount REAL NOT NULL DEFAULT 0.0,
+    balanceId INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER NOT NULL,
+    balanceAmount REAL NOT NULL DEFAULT 0.00,
     createdDate TEXT NOT NULL DEFAULT (datetime('now')),
     updatedDate TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY (user_ID) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
--- For trasactions table
-CREATE TABLE IF NOT EXISTS transaction (
+-- For transactions table
+CREATE TABLE IF NOT EXISTS transactions (
     transactionId INTEGER PRIMARY KEY AUTOINCREMENT,
-    transactionAmount REAL NOT NULL CHECK (transactionAmount > 0),
-    name TEXT NOT NULL,
+    transactionAmount REAL NOT NULL CHECK (transactionAmount > 0.00),
+    transactionName TEXT NOT NULL,
     userId INTEGER NOT NULL,
     transactionDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     transferToAccountNo TEXT,
     transferFromAccountNo TEXT,
     accountNumber TEXT NOT NULL,
-    FOREIGN KEY (userId) REFERENCES users(id)
+    FOREIGN KEY (userId) REFERENCES users(userId)
 );
