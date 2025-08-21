@@ -80,6 +80,100 @@ public class CashInService {
     /**
      * Execute the actual cash-in transaction with proper transaction management
      */
+    // private boolean executeCashInTransaction(
+    //     int receiverUserId,
+    //     String receiverAccountNo,
+    //     BigDecimal amount,
+    //     String senderName,
+    //     String senderAccountNo) {
+
+    // Connection connection = null;
+    // try {
+    //     connection = ConnectionFactory.getConnection();
+    //     connection.setAutoCommit(false);
+
+    //     // 1. Validate sender balance
+    //     Optional<Balance> senderBalanceOpt = balanceDAO.findByAccountNo(senderAccountNo);
+    //     if (!senderBalanceOpt.isPresent()) {
+    //         logger.error("Sender balance not found for account: {}", senderAccountNo);
+    //         connection.rollback();
+    //         return false;
+    //     }
+    //     Balance senderBalance = senderBalanceOpt.get();
+
+    //     if (senderBalance.getAmount().compareTo(amount) < 0) {
+    //         logger.error("Insufficient funds in sender account: {}", senderAccountNo);
+    //         connection.rollback();
+    //         return false;
+    //     }
+
+    //     // 2. Validate receiver balance
+    //     Optional<Balance> receiverBalanceOpt = balanceDAO.findByUserId(receiverUserId);
+    //     if (!receiverBalanceOpt.isPresent()) {
+    //         logger.error("Receiver balance not found for userId: {}", receiverUserId);
+    //         connection.rollback();
+    //         return false;
+    //     }
+    //     Balance receiverBalance = receiverBalanceOpt.get();
+
+    //     // 3. Create transaction record
+    //     CashIn cashInTransaction = new CashIn(
+    //         amount,
+    //         senderName,
+    //         receiverUserId,
+    //         receiverAccountNo,   // transferToAccountNo
+    //         senderAccountNo,     // transferFromAccountNo
+    //         receiverAccountNo
+    //     );
+
+    //     Optional<CashIn> createdTransaction = createTransactionWithConnection(connection, cashInTransaction);
+    //     if (!createdTransaction.isPresent()) {
+    //         connection.rollback();
+    //         return false;
+    //     }
+
+    //     // 4. Update balances
+    //     BigDecimal newSenderBalance = senderBalance.getAmount().subtract(amount);
+    //     BigDecimal newReceiverBalance = receiverBalance.getAmount().add(amount);
+
+    //     if (!balanceDAO.updateBalance(senderBalance.getUserId(), newSenderBalance)) {
+    //         connection.rollback();
+    //         return false;
+    //     }
+
+    //     if (!balanceDAO.updateBalance(receiverUserId, newReceiverBalance)) {
+    //         connection.rollback();
+    //         return false;
+    //     }
+
+    //     // 5. Commit transaction
+    //     connection.commit();
+    //     logger.info("Cash-in successful! {} transferred {} → {}. New balances: sender={}, receiver={}", 
+    //                senderAccountNo, amount, receiverAccountNo, newSenderBalance, newReceiverBalance);
+    //     return true;
+
+    // } catch (Exception e) {
+    //     if (connection != null) {
+    //         try {
+    //             connection.rollback();
+    //         } catch (SQLException rollbackEx) {
+    //             logger.error("Rollback failed: {}", rollbackEx.getMessage());
+    //         }
+    //     }
+    //     logger.error("Cash-in transaction failed: {}", e.getMessage(), e);
+    //     return false;
+
+    // } finally {
+    //     if (connection != null) {
+    //         try {
+    //             connection.setAutoCommit(true);
+    //             connection.close();
+    //         } catch (SQLException e) {
+    //             logger.error("Error closing connection: {}", e.getMessage());
+    //         }
+    //     }
+    // }
+    // }
     private boolean executeCashInTransaction(int userId, String accountNumber, BigDecimal amount, String senderName) {
         Connection connection = null;
         try {

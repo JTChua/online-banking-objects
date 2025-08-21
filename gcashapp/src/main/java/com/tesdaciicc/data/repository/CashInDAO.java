@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +24,7 @@ public class CashInDAO {
     
     // SQL queries matching your existing CashIn table schema
     private static final String INSERT_TRANSACTION = """
-        INSERT INTO transactions (transactionAmount, name, userId, transactionDate, 
-                               transferToAccountNo, transferFromAccountNo, accountNumber)VALUES (?, ?, ?, ?, ?, ?, ?)"""; 
+        INSERT INTO transactions (transactionAmount, transactionName, userId, transferToAccountNo, transferFromAccountNo, accountNumber) VALUES (?, ?, ?, ?, ?, ?)""";
 
     private static final String SELECT_BY_ID = "SELECT * FROM transactions WHERE transactionId = ?";
     private static final String SELECT_BY_USER_ID = "SELECT * FROM transactions WHERE userId = ? ORDER BY transactionDate DESC";
@@ -32,6 +32,8 @@ public class CashInDAO {
     private static final String SELECT_ALL = "SELECT * FROM transactions ORDER BY transactionDate DESC";
     private static final String SELECT_TOTAL_BY_USER_ID = "SELECT COALESCE(SUM(transactionAmount), 0) as total FROM transactions WHERE userId = ?";
     private static final String COUNT_BY_USER_ID = "SELECT COUNT(*) as count FROM transactions WHERE userId = ?";
+    private static final DateTimeFormatter DB_DATE_FORMAT = 
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
      * Create a new cash-in transaction record
@@ -48,10 +50,9 @@ public class CashInDAO {
             stmt.setBigDecimal(1, cashIn.getTransactionAmount());
             stmt.setString(2, cashIn.getName());
             stmt.setInt(3, cashIn.getUserId());
-            stmt.setString(4, cashIn.getTransactionDate().toString());
-            stmt.setString(5, cashIn.getTransferToAccountNo());
-            stmt.setString(6, cashIn.getTransferFromAccountNo());
-            stmt.setString(7, cashIn.getAccountNumber());
+            stmt.setString(4, cashIn.getTransferToAccountNo());
+            stmt.setString(5, cashIn.getTransferFromAccountNo());
+            stmt.setString(6, cashIn.getAccountNumber());
 
             int rowsAffected = stmt.executeUpdate();
 
@@ -253,9 +254,10 @@ public class CashInDAO {
         return new CashIn(
             rs.getInt("transactionId"),
             rs.getBigDecimal("transactionAmount"),
-            rs.getString("name"),
+            rs.getString("transactionName"),
             rs.getInt("userId"),
-            LocalDateTime.parse(rs.getString("transactionDate")),
+            //LocalDateTime.parse(rs.getString("transactionDate")),
+            LocalDateTime.parse(rs.getString("transactionDate"), DB_DATE_FORMAT),
             rs.getString("transferToAccountNo"),
             rs.getString("transferFromAccountNo"),
             rs.getString("accountNumber")

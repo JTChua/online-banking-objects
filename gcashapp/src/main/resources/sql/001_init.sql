@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS balance (
     balanceAmount REAL NOT NULL DEFAULT 0.00,
     createdDate TEXT NOT NULL DEFAULT (datetime('now')),
     updatedDate TEXT NOT NULL DEFAULT (datetime('now')),
+    --accountNumber TEXT UNIQUE,
     FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
@@ -27,7 +28,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     transactionAmount REAL NOT NULL CHECK (transactionAmount > 0.00),
     transactionName TEXT NOT NULL,
     userId INTEGER NOT NULL,
-    transactionDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    transactionDate TEXT NOT NULL DEFAULT (datetime('now')),
     transferToAccountNo TEXT,
     transferFromAccountNo TEXT,
     accountNumber TEXT NOT NULL,

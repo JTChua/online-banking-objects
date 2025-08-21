@@ -130,4 +130,14 @@ public class UserAuthentication {
     return Objects.hash(id);
   }
 
+  // Helper method to get display name
+    public String getDisplayName() {
+        return name != null ? name : email;
+    }
+    
+    // Helper method to check if user has valid authentication
+    public boolean isAuthenticated() {
+        return token != null && !token.trim().isEmpty();
+    }
+
 }

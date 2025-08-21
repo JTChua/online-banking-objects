@@ -148,9 +148,9 @@
               </configuration>
           </execution>
           <execution>
-              <id>run-edb-debug</id>
+              <id>run-cashin-test</id>
               <configuration>
-                  <mainClass>com.tesdaciicc.EnhancedDatabaseDebugTest</mainClass>
+                  <mainClass>com.tesdaciicc.CashInTest</mainClass>
               </configuration>
           </execution>
           <execution>

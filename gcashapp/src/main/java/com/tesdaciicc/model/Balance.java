@@ -94,6 +94,56 @@ public class Balance {
     return isSufficientFor(BigDecimal.valueOf(transactionAmount));
   }
 
+  // Utility methods
+    
+    /**
+     * Add amount to current balance
+     * @param additionalAmount Amount to add
+     * @return New balance amount
+     */
+    public BigDecimal add(BigDecimal additionalAmount) {
+        if (additionalAmount != null) {
+            this.amount = this.amount.add(additionalAmount);
+        }
+        return this.amount;
+    }
+    
+    /**
+     * Subtract amount from current balance
+     * @param deductionAmount Amount to subtract
+     * @return New balance amount
+     */
+    public BigDecimal subtract(BigDecimal deductionAmount) {
+        if (deductionAmount != null) {
+            this.amount = this.amount.subtract(deductionAmount);
+        }
+        return this.amount;
+    }
+    
+    /**
+     * Check if balance is zero
+     * @return true if balance is zero
+     */
+    public boolean isZero() {
+        return amount.compareTo(BigDecimal.ZERO) == 0;
+    }
+    
+    /**
+     * Check if balance is negative
+     * @return true if balance is negative
+     */
+    public boolean isNegative() {
+        return amount.compareTo(BigDecimal.ZERO) < 0;
+    }
+    
+    /**
+     * Check if balance is positive
+     * @return true if balance is positive
+     */
+    public boolean isPositive() {
+        return amount.compareTo(BigDecimal.ZERO) > 0;
+    }
+
   @Override
   public String toString() {
     return "Balance{" +
