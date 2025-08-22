@@ -160,15 +160,15 @@
               </configuration>
           </execution>
           <execution>
-              <id>run-db-debug</id>
+              <id>run-cashtrans-test</id>
               <configuration>
-                  <mainClass>com.tesdaciicc.DatabaseDebugTest</mainClass>
+                  <mainClass>com.tesdaciicc.CashTransTest</mainClass>
               </configuration>
           </execution>
           <execution>
-              <id>run-dsql-debug</id>
+              <id>run-cash-transfer-test</id>
               <configuration>
-                  <mainClass>com.tesdaciicc.DetailedSqlDebug</mainClass>
+                  <mainClass>com.tesdaciicc.CashTransferTest</mainClass>
               </configuration>
           </execution>
           <execution>
