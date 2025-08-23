@@ -195,6 +195,12 @@
                   <mainClass>com.tesdaciicc.DatabaseUtilTest</mainClass>
               </configuration>
           </execution>
+          <execution>
+              <id>run-view-transaction-test</id>
+              <configuration>
+                  <mainClass>com.tesdaciicc.ViewTransactionTest</mainClass>
+              </configuration>
+          </execution>
     </executions>
         </plugin>
       </plugins>
