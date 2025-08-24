@@ -1,43 +1,20 @@
 package com.tesdaciicc.ui;
 
 import com.tesdaciicc.model.UserAuthentication;
-import com.tesdaciicc.ui.Login;
 import com.tesdaciicc.ui.Login.LoginResult;
-import com.tesdaciicc.ui.Registration;
 
 import java.util.Scanner;
+
 
 public class LoginPage {
 
     private static Scanner scanner = new Scanner(System.in);
 
     private LoginPage() {
+        // Private constructor to prevent instantiation
     }
 
-    public static void showMainMenu() {
-        while (true) {
-            System.out.println("\n=== GCash App ===");
-            System.out.println("1. Login");
-            System.out.println("2. Register");
-            System.out.println("3. Exit");
-            System.out.print("Choose option: ");
-
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-
-            switch (choice) {
-                case 1 -> LoginPage.login();
-                case 2 -> Registration.register();
-                case 3 -> {
-                    System.out.println("Thank you for using GCash!");
-                    return;
-                }
-                default -> System.out.println("Invalid option!");
-            }
-        }
-    }
-
-    private static void login() {
+    public static void login() {
         while (true) {
             System.out.println("\n>>>>>   Login   <<<<<");
             System.out.print("Enter email or mobile number (start with 0 and 11 digits): ");
@@ -85,10 +62,10 @@ public class LoginPage {
             } else {
                 // If failed - Error displayed to user
                 System.out.println("\n✗ Login failed!");
-                System.out.println("Invalid Email or Number or PIN");
+                System.out.println("Invalid Credentials, please try again.");
                 System.out.println("Error: " + result.getMessage());
 
-                // 1.1 Exit - Return to Login page
+                // Exit - Return to Login page
                 System.out.println("\nOptions:");
                 System.out.println("1. Try again");
                 System.out.println("2. Back to Login page");
