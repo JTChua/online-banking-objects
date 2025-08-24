@@ -1,10 +1,33 @@
-// package com.tesdaciicc.ui;
+package com.tesdaciicc.ui;
 
 // import com.tesdaciicc.model.UserAuthentication;
 // import com.tesdaciicc.service.UserAuthenticationService;
 // import java.util.Scanner;
 
-// public class Registration {
+public class Registration {
+
+    private Registration() {
+        // Private constructor to prevent instantiation
+    }
+
+    public static void register() {
+        // System.out.println("\n--- Register ---");
+        // System.out.print("Enter full name: ");
+        // String fullName = scanner.nextLine();
+        // System.out.print("Enter email: ");
+        // String email = scanner.nextLine();
+        // System.out.print("Enter phone number: ");
+        // String phoneNumber = scanner.nextLine();
+        // System.out.print("Enter password: ");
+        // String password = scanner.nextLine();
+
+        // boolean success = authService.registerUser(fullName, email, phoneNumber, password);
+        // if (success) {
+        //     System.out.println("Registration successful! Please login.");
+        // } else {
+        //     System.out.println("Registration failed. Email or phone may already exist.");
+        // }
+    }
 
 // private UserAuthenticationService userAuthService;
 
@@ -35,4 +58,4 @@
 // }
 // }
 
-// }
+}
