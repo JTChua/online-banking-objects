@@ -5,7 +5,6 @@ import com.tesdaciicc.ui.Login.LoginResult;
 
 import java.util.Scanner;
 
-
 public class LoginPage {
 
     private static Scanner scanner = new Scanner(System.in);
@@ -14,7 +13,12 @@ public class LoginPage {
         // Private constructor to prevent instantiation
     }
 
-    public static void login() {
+    /**
+     * Login method that returns UserAuthentication object if successful
+     * 
+     * @return UserAuthentication object if login successful, null if failed or user chose to go back
+     */
+    public static UserAuthentication login() {
         while (true) {
             System.out.println("\n>>>>>   Login   <<<<<");
             System.out.print("Enter email or mobile number (start with 0 and 11 digits): ");
@@ -43,7 +47,6 @@ public class LoginPage {
                 continue;
             }
 
-
             // Initialize Login class
             Login login = new Login();
 
@@ -53,12 +56,11 @@ public class LoginPage {
             LoginResult result = login.authenticate(emailOrNumber, pin);
             if (result.isSuccess()) {
                 
-                // If success - User proceed to Home page
+                // If success - Return user object
                 UserAuthentication user = result.getUser();
                 System.out.println("\n✓ Login successful!");
                 System.out.println("Welcome, " + user.getName());
-                //HomePage.showHomePage(user); proceed to users home page
-                return; // After home page, return to login page
+                return user; // Return the authenticated user
             } else {
                 // If failed - Error displayed to user
                 System.out.println("\n✗ Login failed!");
@@ -68,12 +70,12 @@ public class LoginPage {
                 // Exit - Return to Login page
                 System.out.println("\nOptions:");
                 System.out.println("1. Try again");
-                System.out.println("2. Back to Login page");
+                System.out.println("2. Back to main menu");
                 System.out.print("Choose an option: ");
                 
                 String retryChoice = scanner.nextLine().trim();
                 if (retryChoice.equals("2")) {
-                    return; // Return to Login page
+                    return null; // Return null to indicate user chose to go back
                 }
                 // If "1" or any other input, continue the loop (try again)
             }
