@@ -36,10 +36,10 @@ public class HomePage {
 
                 switch (choice) {
                     case 1 -> {
-                        //checkBalance(user);
                         // Placeholder for CheckBalance functionality
-                        // CheckBalance.checkBalance(user);    
-                        // for successful balance check, should also have an option to return to home page menu    
+                        CheckAccountBalance.checkBalance(user);
+                        
+                        //Return to home page menu    
                         returnToHomePageMenu();
                     }
                     case 2 -> {
