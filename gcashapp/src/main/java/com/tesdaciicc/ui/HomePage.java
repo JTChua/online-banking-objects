@@ -43,7 +43,7 @@ public class HomePage {
                         returnToHomePageMenu();
                     }
                     case 2 -> {
-                        //cashIn(user);
+                        CashInTransactions.cashIn(user);
                         // Placeholder for CashIn functionality
                         // CashIn.cashIn(user);
                         // for successful cash in, should also have an option to return to home page menu

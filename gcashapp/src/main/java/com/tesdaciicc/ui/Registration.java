@@ -69,8 +69,8 @@ public class Registration {
             );
             
             // Attempt registration through service
-            boolean registered = authService.registerUser(newUser);
-            
+            boolean registered = authService.registerUserWithBalance(newUser);
+
             if (registered) {
                 logger.info("User registered successfully: {}", email);
                 return new RegistrationResult(true, "Registration successful! You can now login.", newUser);

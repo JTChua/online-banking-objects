@@ -34,17 +34,17 @@ public class CheckAccountBalance {
                 Balance balance = balanceInfo.get();
                 
                 // Display balance information
-                System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                System.out.println("--------------------------------");
                 System.out.println("  ACCOUNT BALANCE INFORMATION");
-                System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                System.out.println("--------------------------------");
                 System.out.println("Account ID     : " + user.getId());
                 System.out.println("Account Name   : " + user.getName());
                 System.out.println("Email          : " + user.getEmail());
                 System.out.println("Phone Number   : " + user.getNumber());
                 System.out.println("Current Balance: " + balance.getFormattedAmount());
                 System.out.println("Last Updated   : " + balance.getUpdatedDate());
-                System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                
+                System.out.println("--------------------------------");
+
                 // Show balance status
                 if (balance.isZero()) {
                     System.out.println("⚠️  Your account balance is zero.");
@@ -58,16 +58,16 @@ public class CheckAccountBalance {
                 
             } else {
                 // Handle case where balance record doesn't exist
-                System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                System.out.println("--------------------------------");
                 System.out.println("  ACCOUNT BALANCE INFORMATION");
-                System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                System.out.println("--------------------------------");
                 System.out.println("Account ID     : " + user.getId());
                 System.out.println("Account Name   : " + user.getName());
                 System.out.println("Email          : " + user.getEmail());
                 System.out.println("Phone Number   : " + user.getNumber());
                 System.out.println("Current Balance: Balance not initialized");
-                System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                
+                System.out.println("--------------------------------");
+
                 System.out.println("⚠️  No balance record found for your account.");
                 System.out.println("   This might be a new account that needs balance initialization.");
                 

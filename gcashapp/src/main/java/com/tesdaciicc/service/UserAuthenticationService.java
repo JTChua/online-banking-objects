@@ -1,8 +1,14 @@
 package com.tesdaciicc.service;
 
+import com.tesdaciicc.data.repository.BalanceDAO;
 import com.tesdaciicc.data.repository.UserAuthenticationDAO;
+import com.tesdaciicc.data.util.ConnectionFactory;
+import com.tesdaciicc.model.Balance;
 import com.tesdaciicc.model.UserAuthentication;
 
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -22,6 +28,87 @@ public class UserAuthenticationService {
   public UserAuthenticationService(UserAuthenticationDAO dao) {
     this.dao = dao;
   }
+
+
+/**
+ * Register a new user and create their initial balance record
+ * This method uses database transactions to ensure both user and balance are created together
+ * 
+ * @param user UserAuthentication object with user details
+ * @return true if both user and balance are created successfully, false otherwise
+ */
+public boolean registerUserWithBalance(UserAuthentication user) {
+    logger.info("Registering user with balance initialization: {}", user.getEmail());
+    
+    Connection connection = null;
+    try {
+        // Get database connection and start transaction
+        connection = ConnectionFactory.getConnection();
+        connection.setAutoCommit(false);
+        
+        // Step 1: Register the user first
+        boolean userRegistered = registerUser(user);
+        if (!userRegistered) {
+            logger.error("Failed to register user: {}", user.getEmail());
+            connection.rollback();
+            return false;
+        }
+        
+        // Step 2: Find the newly created user to get their ID
+        Optional<UserAuthentication> registeredUserOpt = dao.findByEmail(user.getEmail());
+        if (!registeredUserOpt.isPresent()) {
+            logger.error("Could not find newly registered user: {}", user.getEmail());
+            connection.rollback();
+            return false;
+        }
+        
+        UserAuthentication registeredUser = registeredUserOpt.get();
+        
+        // Step 3: Create initial balance record with 0.00
+        BalanceDAO balanceDAO = new BalanceDAO();
+        Balance initialBalance = new Balance(
+            registeredUser.getId(), // userId
+            BigDecimal.ZERO        // Starting balance of 0.00
+        );
+        
+        boolean balanceCreated = balanceDAO.create(initialBalance);
+        if (!balanceCreated) {
+            logger.error("Failed to create initial balance for user: {}", user.getEmail());
+            connection.rollback();
+            return false;
+        }
+        
+        // Step 4: Commit both user and balance creation
+        connection.commit();
+        logger.info("Successfully registered user with initial balance: {}", user.getEmail());
+        return true;
+        
+    } catch (Exception e) {
+        // Rollback transaction on any error
+        if (connection != null) {
+            try {
+                connection.rollback();
+                logger.error("Transaction rolled back due to error during registration: {}", e.getMessage());
+            } catch (SQLException rollbackEx) {
+                logger.error("Failed to rollback transaction: {}", rollbackEx.getMessage());
+            }
+        }
+        logger.error("Error during user registration with balance: {}", e.getMessage(), e);
+        return false;
+        
+    } finally {
+        // Restore auto-commit and close connection
+        if (connection != null) {
+            try {
+                connection.setAutoCommit(true);
+                connection.close();
+            } catch (SQLException e) {
+                logger.error("Error closing connection: {}", e.getMessage());
+            }
+        }
+    }
+}
+
 
   /**
    * Registration method that adds a new user with validation

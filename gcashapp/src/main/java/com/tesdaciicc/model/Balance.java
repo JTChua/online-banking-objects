@@ -1,6 +1,7 @@
 package com.tesdaciicc.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Balance {
@@ -24,6 +25,13 @@ public class Balance {
   // Full constructor (for reading from DB)
   public Balance(int id, int userId, BigDecimal amount, String createdDate, String updatedDate) {
     setId(id);
+    setUserId(userId);
+    setAmount(amount);
+    setCreatedDate(createdDate);
+    setUpdatedDate(updatedDate);
+  }
+
+  public Balance(int userId, BigDecimal amount) {
     setUserId(userId);
     setAmount(amount);
     setCreatedDate(createdDate);
@@ -125,7 +133,8 @@ public class Balance {
      * @return true if balance is zero
      */
     public boolean isZero() {
-        return amount.compareTo(BigDecimal.ZERO) == 0;
+        //return amount.compareTo(BigDecimal.ZERO) == 0;
+        return amount != null && amount.compareTo(BigDecimal.ZERO) == 0;
     }
     
     /**
@@ -133,7 +142,8 @@ public class Balance {
      * @return true if balance is negative
      */
     public boolean isNegative() {
-        return amount.compareTo(BigDecimal.ZERO) < 0;
+        //return amount.compareTo(BigDecimal.ZERO) < 0;
+        return amount != null && amount.compareTo(BigDecimal.ZERO) < 0;
     }
     
     /**
@@ -141,7 +151,8 @@ public class Balance {
      * @return true if balance is positive
      */
     public boolean isPositive() {
-        return amount.compareTo(BigDecimal.ZERO) > 0;
+        //return amount.compareTo(BigDecimal.ZERO) > 0;
+        return amount != null && amount.compareTo(BigDecimal.ZERO) > 0;
     }
 
   @Override
