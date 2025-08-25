@@ -19,7 +19,7 @@ public class HomePage {
     }
 
     private static void homePageMainMenu(UserAuthentication user) {
-        boolean homePageMainMenu = true;
+        boolean homePageMainMenu = true; 
 
         while (homePageMainMenu) {
             System.out.println("\n>>>     JCash Transaction Menu     <<<");
@@ -37,30 +37,22 @@ public class HomePage {
                 switch (choice) {
                     case 1 -> {
                         // Placeholder for CheckBalance functionality
-                        CheckAccountBalance.checkBalance(user);
-                        
-                        //Return to home page menu    
+                        CheckAccountBalance.checkBalance(user);  
                         returnToHomePageMenu();
                     }
                     case 2 -> {
-                        CashInTransactions.cashIn(user);
                         // Placeholder for CashIn functionality
-                        // CashIn.cashIn(user);
-                        // for successful cash in, should also have an option to return to home page menu
+                        CashInTransactions.cashIn(user); 
                         returnToHomePageMenu();
                     }
                     case 3 -> {
-                        //cashTransfer(user);
                         // Placeholder for CashTransfer functionality
-                        // CashTransfer.cashTransfer(user);
-                        // for successful cash transfer, should also have an option to return to home page menu
+                        CashTransferTransactions.cashTransfer(user);
                         returnToHomePageMenu();
                     }
                     case 4 -> {
-                        //viewAllTransactions(user);
                         // Placeholder for ViewAllTransactions functionality
-                        // ViewAllTransactions.viewAllTransactions(user);
-                        // for successful transaction viewing, should also have an option to return to home page menu
+                        ViewAllTransactions.viewAllTransactions(user);
                         returnToHomePageMenu();
                     }
                     case 5 -> {

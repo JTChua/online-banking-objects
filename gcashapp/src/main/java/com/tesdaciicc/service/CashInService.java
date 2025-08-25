@@ -82,70 +82,70 @@ public class CashInService {
      */
     private boolean executeCashInTransaction(int userId, String accountNumber, BigDecimal amount, String senderName) {
         Connection connection = null;
-        try {
-            connection = ConnectionFactory.getConnection();
-            connection.setAutoCommit(false);
+    try {
+        connection = ConnectionFactory.getConnection();
+        connection.setAutoCommit(false);
 
-            // Get current balance
-            Optional<Balance> balanceOpt = balanceDAO.findByUserId(userId);
-            if (!balanceOpt.isPresent()) {
-                logger.error("Balance not found for userId: {}", userId);
-                connection.rollback();
-                return false;
-            }
-
-            Balance currentBalance = balanceOpt.get();
-
-            // Create transaction record
-            CashIn cashInTransaction = new CashIn(
-                amount,
-                senderName,
-                userId,
-                accountNumber, // transferToAccountNo
-                "CASH_IN_SOURCE", // transferFromAccountNo
-                accountNumber
-            );
-
-            // Insert transaction (using connection for consistency)
-            Optional<CashIn> createdTransaction = createTransactionWithConnection(connection, cashInTransaction);
-            if (!createdTransaction.isPresent()) {
-                connection.rollback();
-                return false;
-            }
-
-            // Update balance
-            BigDecimal newBalance = currentBalance.getAmount().add(amount);
-            if (!balanceDAO.updateBalance(userId, newBalance)) {
-                connection.rollback();
-                return false;
-            }
-
-            connection.commit();
-            logger.info("Cash-in successful! Added {} to account {}. New balance: {}", 
-                       amount, accountNumber, newBalance);
-            return true;
-
-        } catch (Exception e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException rollbackEx) {
-                    logger.error("Rollback failed: {}", rollbackEx.getMessage());
-                }
-            }
-            logger.error("Cash-in transaction failed for userId {}: {}", userId, e.getMessage(), e);
+        // Get current balance
+        Optional<Balance> balanceOpt = balanceDAO.findByUserId(userId);
+        if (!balanceOpt.isPresent()) {
+            logger.error("Balance not found for userId: {}", userId);
+            connection.rollback();
             return false;
+        }
 
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.setAutoCommit(true);
-                    connection.close();
-                } catch (SQLException e) {
-                    logger.error("Error closing connection: {}", e.getMessage());
-                }
+        Balance currentBalance = balanceOpt.get();
+
+        // Create transaction record with proper transaction name
+        CashIn cashInTransaction = new CashIn(
+            amount,
+            "CASH_IN_COMPLETED",        // Set proper transaction name/status
+            userId,
+            accountNumber,               // transferToAccountNo
+            senderName,                  // transferFromAccountNo - now using senderName as source
+            accountNumber
+        );
+
+        // Insert transaction (using connection for consistency)
+        Optional<CashIn> createdTransaction = createTransactionWithConnection(connection, cashInTransaction);
+        if (!createdTransaction.isPresent()) {
+            connection.rollback();
+            return false;
+        }
+
+        // Update balance
+        BigDecimal newBalance = currentBalance.getAmount().add(amount);
+        if (!balanceDAO.updateBalance(userId, newBalance)) {
+            connection.rollback();
+            return false;
+        }
+
+        connection.commit();
+        logger.info("Cash-in successful! Added {} to account {}. New balance: {}", 
+                   amount, accountNumber, newBalance);
+        return true;
+
+    } catch (Exception e) {
+        if (connection != null) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                logger.error("Rollback failed: {}", rollbackEx.getMessage());
             }
         }
+        logger.error("Cash-in transaction failed for userId {}: {}", userId, e.getMessage(), e);
+        return false;
+
+    } finally {
+        if (connection != null) {
+            try {
+                connection.setAutoCommit(true);
+                connection.close();
+            } catch (SQLException e) {
+                logger.error("Error closing connection: {}", e.getMessage());
+            }
+        }
+    }
     }
 
     /**
